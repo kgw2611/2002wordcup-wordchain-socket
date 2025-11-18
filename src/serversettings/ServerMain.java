@@ -1,21 +1,35 @@
-package serversettings.network;
+package serversettings;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class ServerMain {
 
     private static final int PORT = 8080;
     private static final List<ClientHandler> clients = new ArrayList<>();
+    private static final Set<String> dictionary = new HashSet<>(370_000);
 
     // 게임 데이터
     private static final Map<String, Integer> lives = new HashMap<>();
     private static int turnIndex = 0;
     private static boolean gameStarted = false;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         System.out.println("🔥 Server Started : 8080");
+
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(
+                new FileInputStream("src/serversettings/MiniDictionary.txt"), StandardCharsets.UTF_8)))
+        {
+            String line;
+            while((line = in.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("#")) continue;
+                dictionary.add(line);
+            }
+            System.out.println("dictionary loaded : " + dictionary.size());
+        } catch (IOException e) { e.printStackTrace(); }
 
         try (ServerSocket server = new ServerSocket(PORT)) {
             while (true) {
