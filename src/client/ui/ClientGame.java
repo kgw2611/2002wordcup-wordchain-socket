@@ -27,7 +27,7 @@ public class ClientGame extends JFrame {
         this.gameController = gameController;
 
         setTitle("끝말잇기 데스매치");
-        setSize(1200, 900);
+        setSize(1050, 700);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -47,16 +47,15 @@ public class ClientGame extends JFrame {
         input = new JTextField();
         input.setFont(new Font("맑은 고딕", Font.PLAIN, 24));
 
-        JButton sendBtn = new JButton("입력");
-        sendBtn.addActionListener(e -> {
-            if (!input.getText().isEmpty()) {
-                gameController.sendWord(input.getText());
+        input.addActionListener(e -> {
+            String text = input.getText();
+            if (!text.isEmpty()) {
+                gameController.sendWord(text);
                 input.setText("");
             }
         });
 
         inputPanel.add(input, BorderLayout.CENTER);
-        inputPanel.add(sendBtn, BorderLayout.EAST);
 
         // 플레이어 패널(가로 4명)
         JPanel playersPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 20));

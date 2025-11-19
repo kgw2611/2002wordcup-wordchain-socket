@@ -17,7 +17,7 @@ public class ServerMain {
     private static boolean gameStarted = false;
 
     public static void main(String[] args) throws IOException {
-        System.out.println("🔥 Server Started : 8080");
+        System.out.println("🔥 Server Started : " + PORT);
 
         try (BufferedReader in = new BufferedReader(new InputStreamReader(
                 new FileInputStream("src/serversettings/MiniDictionary.txt"), StandardCharsets.UTF_8)))
@@ -125,7 +125,12 @@ public class ServerMain {
                     // READY
                     if (msg.startsWith("READY:")) {
                         isReady = !isReady;
-                        broadcast("[SYSTEM] " + playerName + "님이 준비 완료하였습니다");
+                        if(isReady) {
+                            broadcast("[SYSTEM] " + playerName + "님이 준비 완료했습니다");
+                        }
+                        else {
+                            broadcast("[SYSTEM] " + playerName + "님이 준비를 취소했습니다.");
+                        }
 
                         if (allReady()) {
                             gameStarted = true;
