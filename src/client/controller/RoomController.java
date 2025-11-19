@@ -57,10 +57,16 @@ public class RoomController {
             return;
         }
 
-        // 🧡 시스템 메시지 or 채팅
-        if (msg.startsWith("[SYSTEM]") || msg.startsWith("CHAT:")) {
+        // 🧡 채팅
+        if (msg.startsWith("CHAT:")) {
             String chatContent = msg.substring(5);
             if (onChat != null) onChat.accept(chatContent);
+            return;
+        }
+
+        // 시스템 메시지
+        if(msg.startsWith("[SYSTEM]")) {
+            if (onChat != null) onChat.accept(msg);
             return;
         }
 

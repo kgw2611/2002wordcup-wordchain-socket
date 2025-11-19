@@ -22,13 +22,15 @@ public class ClientRoom extends JFrame {
 
     private JButton readyBtn;
 
+    private boolean isReady = false;
+
     public ClientRoom( MainViewModel viewModel, RoomController controller) {
         this.viewModel = viewModel;
         this.controller = controller;
 
 
         setTitle("끝말잇기 - 대기방");
-        setSize(1050, 750);
+        setSize(1050, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -45,8 +47,15 @@ public class ClientRoom extends JFrame {
         add(readyBtn, BorderLayout.SOUTH);
 
         readyBtn.addActionListener(e -> {
+            isReady = !isReady;
             controller.sendReady();
-            readyBtn.setEnabled(false); // 🔥 준비누르면 비활성화
+            
+            if(isReady) {
+                readyBtn.setText("준비 취소");
+            }
+            else {
+                readyBtn.setText("준비 완료");
+            }
         });
 
 
@@ -69,7 +78,7 @@ public class ClientRoom extends JFrame {
         chatPanel.setOpaque(false);
         chatPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
 
-        JLabel chatHeader = new JLabel("채팅창");
+        JLabel chatHeader = new JLabel();
         chatHeader.setFont(Fonts.LABEL);
         chatHeader.setForeground(Colors.TEXT_DARK);
         chatHeader.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
@@ -101,6 +110,13 @@ public class ClientRoom extends JFrame {
         chatPanel.add(inputPanel, BorderLayout.SOUTH);
 
         sendBtn.addActionListener(e -> {
+            String text = chatInput.getText();
+            if (!text.isEmpty()) {
+                controller.sendChat(text);
+                chatInput.setText("");
+            }
+        });
+        chatInput.addActionListener(e -> {
             String text = chatInput.getText();
             if (!text.isEmpty()) {
                 controller.sendChat(text);
