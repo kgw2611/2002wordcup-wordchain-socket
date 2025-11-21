@@ -13,6 +13,7 @@ public class GameController {
     private Consumer<Integer> onLevelUp;
     private Consumer<String> onGameOver;
     private Consumer<String> onLifeLost;
+    private Consumer<String> onInvalidWord;
 
     private int level = 1;
     private boolean countdownDone = false;
@@ -84,6 +85,8 @@ public class GameController {
         onLifeLost = cb;
     }
 
+    public void setOnInvalidWord(Consumer<String> cb) { onInvalidWord = cb; }
+
     // ===== ClientReceiver 가 호출 =====
     public void triggerGameStart() {
         if (onGameStart != null) onGameStart.run();
@@ -113,5 +116,9 @@ public class GameController {
     // 🔥 서버에서 "LIFE_LOST:이름" 왔을 때 호출
     public void triggerLifeLost(String name) {
         if (onLifeLost != null) onLifeLost.accept(name);
+    }
+
+    public void triggerInvalidWord(String data) {
+        if (onInvalidWord != null) onInvalidWord.accept(data); // data = "이름:단어"
     }
 }

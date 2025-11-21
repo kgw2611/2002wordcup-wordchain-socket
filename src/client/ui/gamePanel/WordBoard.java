@@ -21,6 +21,36 @@ public class WordBoard extends JPanel {
     }
 
     public void setWord(String word) {
+        wordLabel.setForeground(Color.WHITE);  // 정상은 흰색
         wordLabel.setText(word);
+    }
+
+    public void showInvalidWord(String playerName, String word) {
+        wordLabel.setForeground(Color.RED);   // 오답은 빨간색
+        wordLabel.setText(playerName + word);
+
+        // 흔들리는 애니메이션 효과
+        shakeAnimation();
+    }
+
+    private void shakeAnimation() {
+        Point original = wordLabel.getLocation();
+        int shakeDistance = 8;
+
+        Timer timer = new Timer(20, null);
+        final int[] count = {0};
+
+        timer.addActionListener(e -> {
+            int offset = (count[0] % 2 == 0) ? shakeDistance : -shakeDistance;
+            wordLabel.setLocation(original.x + offset, original.y);
+            count[0]++;
+
+            if (count[0] > 10) {
+                timer.stop();
+                wordLabel.setLocation(original);
+            }
+        });
+
+        timer.start();
     }
 }
