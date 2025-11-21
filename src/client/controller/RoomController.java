@@ -87,6 +87,12 @@ public class RoomController {
 
     private void handleGameMessage(String msg) {
 
+        if (msg.startsWith("WORD_INVALID:")) {
+            // "이름:단어" 부분만 잘라서 GameController로 전달
+            gameController.triggerInvalidWord(msg.substring(13));
+            return;
+        }
+
         // TURN:이름
         if (msg.startsWith("TURN:")) {
             gameController.triggerTurn(msg.substring(5));
@@ -95,7 +101,8 @@ public class RoomController {
 
         // WORD:사과
         if (msg.startsWith("WORD:")) {
-            gameController.triggerWord(msg.substring(5));
+            String word = msg.substring(5).trim();
+            gameController.triggerWord(word);
             return;
         }
 

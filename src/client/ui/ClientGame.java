@@ -114,6 +114,21 @@ public class ClientGame extends JFrame {
             dispose();
         });
 
+        gameController.setOnInvalidWord(data -> {
+            // data 형식: "플레이어이름:단어"
+            String[] parts = data.split(":", 2);
+            String playerName = parts[0];
+            String word = (parts.length > 1) ? parts[1] : "";
+
+            // 보드에 오답 표시
+            wordBoard.showInvalidWord(playerName, word);
+
+            // 내가 낸 오답이면 입력창에 에러 효과
+            if (playerName.equals(myName)) {
+                flashInputError();
+            }
+        });
+
         // 화면 진입 후 카운트다운 시작!
         showCountdownOverlay();
     }
@@ -168,5 +183,15 @@ public class ClientGame extends JFrame {
         if (alive == 1) {
             gameController.sendWinner(lastAlive);
         }
+    }
+
+    private void flashInputError() {
+        Color originalBg = input.getBackground();
+        input.setBackground(new Color(255, 220, 220)); // 연한 빨간 배경
+        input.requestFocus();
+
+        Timer t = new Timer(200, e -> input.setBackground(originalBg));
+        t.setRepeats(false);
+        t.start();
     }
 }

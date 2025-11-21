@@ -12,7 +12,13 @@ public class PlayerPanel extends JPanel {
     private JLabel readyBadge;
     private JPanel bg;
 
+    private final boolean isSelf;
+    private Color bgColor;
+
     public PlayerPanel(PlayerInfo player, boolean isSelf) {
+
+        this.isSelf = isSelf;
+        bgColor = isSelf ? new Color(255, 245, 220) : Colors.BACKGROUND;
 
         setOpaque(false);
 
@@ -22,7 +28,7 @@ public class PlayerPanel extends JPanel {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Colors.BACKGROUND);
+                g2.setColor(bgColor); // ← 여기서 필드 사용
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25);
             }
         };
