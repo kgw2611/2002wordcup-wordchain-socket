@@ -75,7 +75,8 @@ public class ClientGame extends JFrame {
                     getClass().getClassLoader().getResource("client/resource/PlayerImage.png")
             );
 
-            PlayerCard card = new PlayerCard(p.getName(), icon);
+            boolean isSelf = p.getName().equals(myName);
+            PlayerCard card = new PlayerCard(p.getName(), icon, isSelf);
             playerCards.add(card);
             playersPanel.add(card);
         }
