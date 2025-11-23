@@ -82,7 +82,30 @@ public class PlayerCard extends JPanel {
     public boolean isDead() { return dead; }
 
     public void setTurn(boolean turn) {
-        if (!dead) arrowLabel.setVisible(turn);
+        if (dead) {
+            arrowLabel.setVisible(false);
+            setBorder(null);
+            setOpaque(false);
+            return;
+        }
+
+        arrowLabel.setVisible(turn);
+
+        if (turn) {
+            // 내 차례일 때 시각적 강조
+            setBorder(BorderFactory.createLineBorder(new Color(255, 80, 80), 4));
+            setBackground(new Color(255, 240, 240));
+            setOpaque(true);
+            nameLabel.setForeground(Color.RED);
+        }
+        else
+        {
+            // 평소 상태
+            setBorder(null);
+            setBackground(null);
+            setOpaque(false);
+            nameLabel.setForeground(Color.BLACK);
+        }
     }
 
     // ---- 목숨 감소 ----

@@ -167,9 +167,17 @@ public class ClientRoom extends JFrame {
         GameController gc = controller.getGameController();
 
         ClientGame game = new ClientGame(myName, gc, players);
-        game.setVisible(true);
 
-        this.dispose();
+        // 게임 종료 시
+        game.setOnGameFinished(() -> {
+            SwingUtilities.invokeLater(() -> {
+                resetReadyUI();
+                this.setVisible(true);   // 숨겨놨던 대기방 다시 등장
+            });
+        });
+
+        this.setVisible(false);      // 대기방은 닫지 말고 숨기기만
+        game.setVisible(true);
     }
 
 
@@ -199,6 +207,24 @@ public class ClientRoom extends JFrame {
         slotPanel.revalidate();
         slotPanel.repaint();
     }
+
+    // 게임 종료 시 준비 상태 초기화
+    private void resetReadyUI() {
+        isReady = false;
+        readyBtn.setText("준비 완료");
+
+        int count = slotPanel.getComponentCount();
+        for (int i = 0; i < count; i++) {
+            Component comp = slotPanel.getComponent(i);
+            if (comp instanceof JPanel cell && cell.getComponentCount() > 0) {
+                Component inner = cell.getComponent(0);
+                if (inner instanceof PlayerPanel pp) {
+                    pp.updateReadyState(false);
+                }
+            }
+        }
+    }
+
 
 
     // 빈 슬롯

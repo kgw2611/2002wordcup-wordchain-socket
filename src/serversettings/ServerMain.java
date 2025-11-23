@@ -78,6 +78,7 @@ public class ServerMain {
         if (alive.size() == 1) {
             broadcast("GAME_OVER:" + alive.get(0));
             gameStarted = false;
+            resetReady();
             return;
         }
 
@@ -216,11 +217,6 @@ public class ServerMain {
 
                         broadcast("LIFE_LOST:" + playerName);
 
-                        // 죽음 판정
-                        if (remain <= 0) {
-                            broadcast("[SYSTEM] " + playerName + " 탈락!");
-                        }
-
                         nextTurn();
                         continue;
                     }
@@ -229,6 +225,9 @@ public class ServerMain {
                     if (msg.startsWith("WINNER:")) {
                         String winner = msg.substring(7);
                         broadcast("GAME_OVER:" + winner);
+
+                        gameStarted = false;
+                        resetReady();
                     }
                 }
 
@@ -276,5 +275,12 @@ public class ServerMain {
         word = word.trim();
         if (word.length() < 2) return false; // 1글자 패스
         return dictionary.contains(word);
+    }
+
+    private static void resetReady() {
+        for (ClientHandler c : clients) {
+            c.isReady = false;
+        }
+        broadcastReadyList();
     }
 }
