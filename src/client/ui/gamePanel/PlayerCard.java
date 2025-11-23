@@ -17,6 +17,9 @@ public class PlayerCard extends JPanel {
     private Timer jumpTimer;
     private int jumpOffset = 0;
     private boolean goingUp = true;
+    private boolean isSelf = false;   // 자기 자신 여부
+    private boolean isCurrentTurn = false;
+
 
     // 이미지 리사이즈 공통 함수
     private ImageIcon resize(ImageIcon icon, int w, int h) {
@@ -30,7 +33,9 @@ public class PlayerCard extends JPanel {
         return new ImageIcon(getClass().getClassLoader().getResource("client/resource/" + name));
     }
 
-    public PlayerCard(String name, ImageIcon rawIcon) {
+    public PlayerCard(String name, ImageIcon rawIcon, boolean isSelf) {
+
+        this.isSelf = isSelf;
 
         setOpaque(false);
         setLayout(new BorderLayout());
@@ -84,29 +89,43 @@ public class PlayerCard extends JPanel {
     public void setTurn(boolean turn) {
         if (dead) {
             arrowLabel.setVisible(false);
-            setBorder(null);
-            setOpaque(false);
             return;
         }
 
+        isCurrentTurn = turn;
         arrowLabel.setVisible(turn);
 
-        if (turn) {
-            // 내 차례일 때 시각적 강조
-            setBorder(BorderFactory.createLineBorder(new Color(255, 80, 80), 4));
-            setBackground(new Color(255, 240, 240));
-            setOpaque(true);
-            nameLabel.setForeground(Color.RED);
-        }
-        else
-        {
-            // 평소 상태
+        refreshStyle();
+    }
+
+    private void refreshStyle() {
+        if (dead) {
             setBorder(null);
             setBackground(null);
             setOpaque(false);
+            nameLabel.setForeground(Color.GRAY);
+            return;
+        }
+
+        // 🔥 자기 자신 기본 배경
+        if (isSelf) {
+            setOpaque(true);
+            setBackground(new Color(255, 250, 220)); // 은은한 노랑 (원하면 바꿔도 됨)
+        } else {
+            setOpaque(false);
+            setBackground(null);
+        }
+
+        // 🔥 내 턴이면 강조 추가
+        if (isCurrentTurn) {
+            setBorder(BorderFactory.createLineBorder(new Color(255, 80, 80), 4));
+            nameLabel.setForeground(Color.RED);
+        } else {
+            setBorder(null);
             nameLabel.setForeground(Color.BLACK);
         }
     }
+
 
     // ---- 목숨 감소 ----
     public void loseLife() {
