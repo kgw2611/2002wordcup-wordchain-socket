@@ -15,11 +15,17 @@ public class ClientGame extends JFrame {
 
     private List<PlayerCard> playerCards = new ArrayList<>();
     private GameController gameController;
+    private Runnable onGameFinished;
+
+    public void setOnGameFinished(Runnable onGameFinished) {
+        this.onGameFinished = onGameFinished;
+    }
 
     private String myName;
     private TimerBar timerBar;
     private WordBoard wordBoard;
     private JTextField input;
+    private boolean myTurnNow = false;
 
     public ClientGame(String myName, GameController gameController, List<PlayerInfo> players) {
 
@@ -30,7 +36,7 @@ public class ClientGame extends JFrame {
         setSize(1050, 700);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         // 타이머
         timerBar = new TimerBar(gameController.getLevelTime(), () -> {
@@ -46,8 +52,11 @@ public class ClientGame extends JFrame {
         JPanel inputPanel = new JPanel(new BorderLayout());
         input = new JTextField();
         input.setFont(new Font("맑은 고딕", Font.PLAIN, 24));
+        setInputEnabled(false);
 
         input.addActionListener(e -> {
+            if (!input.isEnabled()) return;
+
             String text = input.getText();
             if (!text.isEmpty()) {
                 gameController.sendWord(text);
@@ -83,20 +92,25 @@ public class ClientGame extends JFrame {
 
         gameController.setOnTurn(name -> {
 
-            if (!gameController.isCountdownDone()) return;
+            //if (!gameController.isCountdownDone()) return;
 
             for (PlayerCard card : playerCards) card.setTurn(false);
+
+            boolean isMyTurn = name.equals(myName);
 
             for (PlayerCard card : playerCards) {
                 if (card.getPlayerName().equals(name) && !card.isDead()) {
                     card.setTurn(true);
-
-                    if (name.equals(myName)) {
-                        timerBar.start(gameController.getLevelTime());
-                    } else {
-                        timerBar.stop();
-                    }
+                    break;
                 }
+            }
+
+            setInputEnabled(isMyTurn);
+            if(isMyTurn) {
+                timerBar.start(gameController.getLevelTime());
+            }
+            else {
+                timerBar.stop();
             }
         });
 
@@ -112,6 +126,8 @@ public class ClientGame extends JFrame {
         gameController.setOnGameOver(winner -> {
             JOptionPane.showMessageDialog(this, winner + "님 승리!");
             dispose();
+
+            if(onGameFinished != null) onGameFinished.run();
         });
 
         gameController.setOnInvalidWord(data -> {
@@ -167,6 +183,15 @@ public class ClientGame extends JFrame {
 
             } catch (Exception ignored) {}
         }).start();
+    }
+
+    private void setInputEnabled(boolean enabled) {
+        myTurnNow = enabled;
+        input.setEnabled(enabled);
+        input.setBackground(enabled ? Color.WHITE : new Color(230, 230, 230));
+        if (!enabled) {
+            input.setText("");
+        }
     }
 
     private void checkWinner() {
