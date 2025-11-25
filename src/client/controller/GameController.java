@@ -22,6 +22,7 @@ public class GameController {
         return countdownDone;
     }
 
+
     public void triggerCountdownFinished() {
         countdownDone = true;
     }

@@ -12,6 +12,8 @@ public class ServerMain {
     private static final Set<String> dictionary = new HashSet<>(370_000); // 단어 사전
     private static final Set<String> usedWords = new HashSet<>(); // 사용된 단어 사전
     private static String lastWord = null;
+    private static int level = 1;        // 현재 레벨
+    private static int wordCount = 0;
 
     // 게임 데이터
     private static final Map<String, Integer> lives = new HashMap<>();
@@ -68,7 +70,7 @@ public class ServerMain {
     }
 
     // 턴 넘기기
-    private static synchronized void nextTurn() {
+    private static synchronized void nextTurn(String currentPlayer) {
 
         if (!gameStarted) return;
 
@@ -82,8 +84,18 @@ public class ServerMain {
             return;
         }
 
-        turnIndex = (turnIndex + 1) % alive.size();
-        broadcast("TURN:" + alive.get(turnIndex));
+        // currentPlayer가 alive 리스트에서 몇 번째인지 찾기
+        int idx = alive.indexOf(currentPlayer);
+
+        if (idx == -1) {
+            // 혹시 이미 목록에서 빠졌다면(예외 케이스), 0번부터 시작
+            idx = 0;
+        } else {
+            // 그 다음 사람으로 이동
+            idx = (idx + 1) % alive.size();
+        }
+
+        broadcast("TURN:" + alive.get(idx));
     }
 
     // ==== 클라이언트 핸들러 ====
@@ -160,6 +172,8 @@ public class ServerMain {
                                 lastWord = null;
 
                                 turnIndex = 0;
+                                level = 1;
+                                wordCount = 0;
                                 broadcast("GAME_START");
                                 broadcast("TURN:" + alive.get(0));
                             }).start();
@@ -167,47 +181,67 @@ public class ServerMain {
                         continue;
                     }
 
+
                     // WORD
+
                     if (msg.startsWith("WORD:")) {
                         String word = msg.substring(5).trim();
 
-                        // 사전에 없는 단어
-                        if (!isValidWord(word)) {
-                            broadcast("WORD_INVALID:" + word);
-                            // 턴 유지
+                        boolean valid = true;
+
+                        // 1) 사전에 없음
+                        if (!isValidWord(word)) valid = false;
+
+                        // 2) 중복 단어
+                        synchronized (usedWords) {
+                            if (usedWords.contains(word)) valid = false;
+                        }
+
+                        // 3) 끝말 규칙 불일치
+                        if (lastWord != null) {
+                            char prev = lastWord.charAt(lastWord.length() - 1);
+                            char curr = word.charAt(0);
+                            if (prev != curr) valid = false;
+                        }
+
+                        // ===== 틀린 단어 처리 =====
+                        if (!valid) {
+                            broadcast("WORD_INVALID:" + playerName + ":" + word);
                             continue;
                         }
 
-                        // 중복 단어
-                        synchronized (usedWords) { // 사용된 단어 사전에 대한 플레이어 임계 처리
-                            if (usedWords.contains(word)) {
-                                broadcast("WORD_INVALID:" + word);
-                                // 턴 유지
-                                continue;
-                            }
+                        // ===== 올바른 단어 처리 =====
+                        synchronized (usedWords) { usedWords.add(word); }
+                        lastWord = word;
+
+                        broadcast("WORD:" + word);
+
+                        // ===== 레벨업 체크 =====
+                        wordCount++;
+
+                        if (wordCount >= 12) {
+                            level++;
+                            wordCount = 0;
+
+                            // 모든 클라이언트에게 레벨업 알림
+                            broadcast("LEVEL_UP:" + level);
+
+                            // 라운드 리셋
+                            lastWord = null;
+
+                            // 레벨업 후 → 단어 입력한 사람부터 다시 시작
+                            nextTurn(playerName);
+                        } else {
+                            // 평소처럼 다음 사람에게 턴 넘김
+                            nextTurn(playerName);
                         }
 
-                        // 끝말잇기 규칙 확인
-                        if(lastWord != null) {
-                            char prevLastChar = lastWord.charAt(lastWord.length() - 1);
-                            char currFirstChar = word.charAt(0);
-
-                            if (prevLastChar != currFirstChar) {
-                                broadcast("WORD_INVALID:" + word);
-                                continue;
-                            }
-                        }
-
-                        // 사용된 단어 사전에 등록
-                        synchronized (usedWords) {
-                            usedWords.add(word);
-                        }
-                        lastWord = word; // 마지막 단어 업데이트
-
-                        broadcast("WORD:"+ word);
-                        nextTurn();
                         continue;
                     }
+
+
+
+                    // TIMEOUT → LIFE_LOST 처리
 
                     // TIMEOUT → LIFE_LOST 처리
                     if (msg.equals("TIMEOUT")) {
@@ -217,9 +251,20 @@ public class ServerMain {
 
                         broadcast("LIFE_LOST:" + playerName);
 
-                        nextTurn();
+                        // ❗ 시간 초과 → 체인 끊기 (새 라운드 느낌)
+                        lastWord = null;
+
+                        if (remain <= 0) {
+                            // 죽었으면 다음 생존자에게 턴 넘김
+                            nextTurn(playerName);
+                        } else {
+                            // 아직 살아 있으면, 본인부터 새 단어로 다시 시작
+                            broadcast("TURN:" + playerName);
+                        }
                         continue;
                     }
+
+
 
                     // WINNER 직접 전달
                     if (msg.startsWith("WINNER:")) {

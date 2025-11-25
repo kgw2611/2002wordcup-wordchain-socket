@@ -20,7 +20,6 @@ public class PlayerCard extends JPanel {
     private boolean isSelf = false;   // 자기 자신 여부
     private boolean isCurrentTurn = false;
 
-
     // 이미지 리사이즈 공통 함수
     private ImageIcon resize(ImageIcon icon, int w, int h) {
         Image img = icon.getImage();
@@ -44,7 +43,7 @@ public class PlayerCard extends JPanel {
         // ---- 턴 표시 화살표 ----
         arrowLabel = new JLabel("▼", SwingConstants.CENTER);
         arrowLabel.setFont(new Font("맑은 고딕", Font.BOLD, 26));
-        arrowLabel.setForeground(Color.RED);
+        arrowLabel.setForeground(new Color(255, 80, 80));
         arrowLabel.setVisible(false);
         add(arrowLabel, BorderLayout.NORTH);
 
@@ -52,6 +51,8 @@ public class PlayerCard extends JPanel {
         ImageIcon resized = resize(rawIcon, 120, 120);
         imageLabel = new JLabel(resized);
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        // 약간 위로 공간 확보해 주면 리본이랑 안 겹침
+        imageLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
         add(imageLabel, BorderLayout.CENTER);
 
         // ==== 하트 + 이름 패널 ====
@@ -89,43 +90,15 @@ public class PlayerCard extends JPanel {
     public void setTurn(boolean turn) {
         if (dead) {
             arrowLabel.setVisible(false);
+            isCurrentTurn = false;
+            repaint();
             return;
         }
 
         isCurrentTurn = turn;
         arrowLabel.setVisible(turn);
-
-        refreshStyle();
+        repaint();
     }
-
-    private void refreshStyle() {
-        if (dead) {
-            setBorder(null);
-            setBackground(null);
-            setOpaque(false);
-            nameLabel.setForeground(Color.GRAY);
-            return;
-        }
-
-        // 🔥 자기 자신 기본 배경
-        if (isSelf) {
-            setOpaque(true);
-            setBackground(new Color(255, 250, 220)); // 은은한 노랑 (원하면 바꿔도 됨)
-        } else {
-            setOpaque(false);
-            setBackground(null);
-        }
-
-        // 🔥 내 턴이면 강조 추가
-        if (isCurrentTurn) {
-            setBorder(BorderFactory.createLineBorder(new Color(255, 80, 80), 4));
-            nameLabel.setForeground(Color.RED);
-        } else {
-            setBorder(null);
-            nameLabel.setForeground(Color.BLACK);
-        }
-    }
-
 
     // ---- 목숨 감소 ----
     public void loseLife() {
@@ -147,6 +120,9 @@ public class PlayerCard extends JPanel {
         ImageIcon deadIcon = load("PlayerDieImage.png");
         deadIcon = resize(deadIcon, 120, 120);
         imageLabel.setIcon(deadIcon);
+
+        nameLabel.setForeground(Color.GRAY);
+        repaint();
     }
 
     private void startJump() {
@@ -166,6 +142,63 @@ public class PlayerCard extends JPanel {
                 jumpTimer.stop();
             }
         }
+        // 살짝 y값만 변경
         imageLabel.setLocation(imageLabel.getX(), 10 + jumpOffset);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        int w = getWidth();
+        int h = getHeight();
+
+        // 카드 배경 색
+        Color bg;
+        if (dead) {
+            bg = new Color(230, 230, 230);
+        } else if (isSelf) {
+            bg = new Color(255, 245, 210); // 자기 자신: 연한 노랑
+        } else {
+            bg = new Color(245, 245, 245);
+        }
+
+        // 카드 배경
+        g2.setColor(bg);
+        g2.fillRoundRect(0, 0, w - 1, h - 1, 30, 30);
+
+        // 그림자 느낌 테두리
+        g2.setColor(new Color(200, 200, 200));
+        g2.drawRoundRect(0, 0, w - 1, h - 1, 30, 30);
+
+        // 내 턴이면 굵은 테두리 + 이름 빨간색
+        if (isCurrentTurn && !dead) {
+            g2.setStroke(new BasicStroke(4f));
+            g2.setColor(new Color(255, 80, 80));
+            g2.drawRoundRect(2, 2, w - 5, h - 5, 30, 30);
+            nameLabel.setForeground(new Color(220, 40, 40));
+        } else if (!dead) {
+            nameLabel.setForeground(Color.BLACK);
+        }
+
+        // 자기 자신이면 왼쪽 위에 "YOU" 리본
+        if (isSelf && !dead) {
+            int rw = 60;
+            int rh = 26;
+            g2.setColor(new Color(255, 120, 80));
+            g2.fillRoundRect(10, 10, rw, rh, 12, 12);
+
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("맑은 고딕", Font.BOLD, 14));
+            FontMetrics fm = g2.getFontMetrics();
+            String txt = "YOU";
+            int tx = 10 + (rw - fm.stringWidth(txt)) / 2;
+            int ty = 10 + ((rh - fm.getHeight()) / 2 + fm.getAscent());
+            g2.drawString(txt, tx, ty);
+        }
+
+        g2.dispose();
+        super.paintComponent(g);
     }
 }

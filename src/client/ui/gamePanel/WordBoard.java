@@ -10,7 +10,7 @@ public class WordBoard extends JPanel {
     private String lastValidWord;
 
     public WordBoard() {
-        setPreferredSize(new Dimension(800, 120));
+        //setPreferredSize(new Dimension(800, 120));
         setBackground(new Color(50, 80, 50));
         setBorder(BorderFactory.createLineBorder(new Color(120, 70, 20), 10));
 
@@ -40,9 +40,9 @@ public class WordBoard extends JPanel {
         lastWordLabel.setText("마지막 단어: " + word);
     }
 
-    public void showInvalidWord(String playerName, String word) {
+    public void showInvalidWord( String word) {
         wordLabel.setForeground(Color.RED);   // 오답은 빨간색
-        wordLabel.setText(playerName + word);
+        wordLabel.setText(word);
 
         // 흔들리는 애니메이션 효과
         shakeAnimation();
