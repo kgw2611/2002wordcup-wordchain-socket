@@ -176,6 +176,8 @@ public class ClientGame extends JFrame {
                 if (card.getPlayerName().equals(name))
                     card.loseLife();
 
+            wordBoard.setWord("아무 단어나 입력하세요!");
+            wordBoard.resetLastWord();
             checkWinner();
         });
 
