@@ -48,6 +48,11 @@ public class WordBoard extends JPanel {
         shakeAnimation();
     }
 
+    public void resetLastWord() {
+        lastValidWord = null;
+        lastWordLabel.setText("마지막 단어: -");
+    }
+
     private void shakeAnimation() {
         Point original = wordLabel.getLocation();
         int shakeDistance = 8;
