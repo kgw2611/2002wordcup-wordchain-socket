@@ -19,6 +19,8 @@ public class Images {
             new ImageIcon("src/client/resource/PlayerImage2.png");
     public static final ImageIcon PLAYER3_IMG=
             new ImageIcon("src/client/resource/PlayerImage3.png");
+    public static final ImageIcon GAME_BACKGROUND=
+            new ImageIcon("src/client/resource/GameBackground.png");
     private static final Map<String, ImageIcon> CHARACTER_MAP = new HashMap<>();
 
     static {

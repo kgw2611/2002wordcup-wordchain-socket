@@ -2,6 +2,7 @@ package client.ui.gamePanel;
 
 import javax.swing.*;
 import java.awt.*;
+import client.resource.Fonts;
 
 public class WordBoard extends JPanel {
 
@@ -10,21 +11,19 @@ public class WordBoard extends JPanel {
     private String lastValidWord;
 
     public WordBoard() {
-        //setPreferredSize(new Dimension(800, 120));
         setBackground(new Color(50, 80, 50));
         setBorder(BorderFactory.createLineBorder(new Color(120, 70, 20), 10));
 
         wordLabel = new JLabel("-", SwingConstants.CENTER);
-        wordLabel.setFont(new Font("맑은 고딕", Font.BOLD, 40));
+        wordLabel.setFont(Fonts.TITLE.deriveFont(40f));    // ★ 폰트 변경
         wordLabel.setForeground(Color.WHITE);
 
         lastWordLabel = new JLabel("마지막 단어: -", SwingConstants.RIGHT);
-        lastWordLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+        lastWordLabel.setFont(Fonts.NORMAL.deriveFont(14f));   // ★ 폰트 변경
         lastWordLabel.setForeground(new Color(220, 220, 220));
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
-        bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 10)); // 오른쪽 아래 여백
         bottomPanel.add(lastWordLabel, BorderLayout.EAST);
 
         setLayout(new BorderLayout());
@@ -33,18 +32,16 @@ public class WordBoard extends JPanel {
     }
 
     public void setWord(String word) {
-        wordLabel.setForeground(Color.WHITE);  // 정상은 흰색
+        wordLabel.setForeground(Color.WHITE);
         wordLabel.setText(word);
 
         lastValidWord = word;
         lastWordLabel.setText("마지막 단어: " + word);
     }
 
-    public void showInvalidWord( String word) {
-        wordLabel.setForeground(Color.RED);   // 오답은 빨간색
+    public void showInvalidWord(String word) {
+        wordLabel.setForeground(Color.RED);
         wordLabel.setText(word);
-
-        // 흔들리는 애니메이션 효과
         shakeAnimation();
     }
 

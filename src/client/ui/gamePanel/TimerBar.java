@@ -2,6 +2,7 @@ package client.ui.gamePanel;
 
 import javax.swing.*;
 import java.awt.*;
+import client.resource.Fonts;
 
 public class TimerBar extends JPanel {
 
@@ -22,24 +23,22 @@ public class TimerBar extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
-        // 타이머 숫자
         timeLabel = new JLabel(sec + "초", SwingConstants.CENTER);
-        timeLabel.setFont(new Font("맑은 고딕", Font.BOLD, 26));
+        timeLabel.setFont(Fonts.LABEL.deriveFont(26f));   // ★ 폰트 변경
         add(timeLabel, BorderLayout.NORTH);
 
-        // 바 형태 프로그레스바
         bar = new JProgressBar(0, sec);
         bar.setValue(sec);
         bar.setStringPainted(false);
-        bar.setForeground(new Color(0, 200, 0)); // 초록
+        bar.setForeground(new Color(0, 200, 0));
         bar.setPreferredSize(new Dimension(800, 30));
         add(bar, BorderLayout.CENTER);
 
-        // 1초마다 tick
         timer = new Timer(1000, e -> tick());
     }
 
     private void tick() {
+
         time--;
         if (time <= 0) {
             time = 0;
@@ -55,13 +54,12 @@ public class TimerBar extends JPanel {
         timeLabel.setText(time + "초");
         bar.setValue(time);
 
-        // 색상 변경
         if (time <= 3) {
             bar.setForeground(Color.RED);
         } else if (time <= 5) {
-            bar.setForeground(new Color(255, 140, 0)); // 주황
+            bar.setForeground(new Color(255, 140, 0));
         } else {
-            bar.setForeground(new Color(0, 200, 0)); // 초록
+            bar.setForeground(new Color(0, 200, 0));
         }
     }
 

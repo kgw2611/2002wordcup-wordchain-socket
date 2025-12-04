@@ -2,6 +2,7 @@ package client.ui;
 
 import client.controller.GameController;
 import client.model.PlayerInfo;
+import client.resource.Fonts;
 import client.resource.Images;
 import client.ui.gamePanel.PlayerCard;
 import client.ui.gamePanel.TimerBar;
@@ -36,16 +37,23 @@ public class ClientGame extends JFrame {
         setLayout(new BorderLayout());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        // 전체 배경색
-        getContentPane().setBackground(new Color(245, 242, 235));
+        JPanel backgroundPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(Images.GAME_BACKGROUND.getImage(), 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        backgroundPanel.setLayout(new BorderLayout());
+        setContentPane(backgroundPanel);
 
-        // ====== 상단 패널 ======
+        // ====== 상단 ======
         timerBar = new TimerBar(gameController.getLevelTime(), () -> {
             gameController.sendTimeout();
         });
 
         levelLabel = new JLabel("레벨 1", SwingConstants.CENTER);
-        levelLabel.setFont(new Font("맑은 고딕", Font.BOLD, 28));
+        levelLabel.setFont(Fonts.TITLE.deriveFont(28f));   // ★ 폰트 변경
         levelLabel.setForeground(new Color(70, 70, 70));
 
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -56,30 +64,23 @@ public class ClientGame extends JFrame {
         add(topPanel, BorderLayout.NORTH);
 
         // ====== 중앙 칠판 ======
-        // ====== 중앙 칠판 ======
         wordBoard = new WordBoard();
-
-
         JPanel centerWrapper = new JPanel(new BorderLayout());
         centerWrapper.setOpaque(false);
-
         centerWrapper.setBorder(BorderFactory.createEmptyBorder(30, 80, 30, 80));
         centerWrapper.add(wordBoard, BorderLayout.CENTER);
-
         add(centerWrapper, BorderLayout.CENTER);
-
 
         // ====== 입력창 ======
         JPanel inputPanel = new JPanel(new BorderLayout());
         inputPanel.setOpaque(false);
 
         input = new JTextField();
-        input.setFont(new Font("맑은 고딕", Font.PLAIN, 24));
+        input.setFont(Fonts.NORMAL.deriveFont(24f));   // ★ 폰트 변경
         setInputEnabled(false);
 
         input.addActionListener(e -> {
             if (!input.isEnabled()) return;
-
             String text = input.getText();
             if (!text.isEmpty()) {
                 gameController.sendWord(text);
@@ -103,7 +104,7 @@ public class ClientGame extends JFrame {
         }
 
         JLabel playersTitle = new JLabel("플레이어", SwingConstants.LEFT);
-        playersTitle.setFont(new Font("맑은 고딕", Font.BOLD, 16));
+        playersTitle.setFont(Fonts.LABEL.deriveFont(16f));   // ★ 폰트 변경
         playersTitle.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
 
         JPanel playersWrapper = new JPanel(new BorderLayout());
@@ -111,7 +112,7 @@ public class ClientGame extends JFrame {
         playersWrapper.add(playersTitle, BorderLayout.NORTH);
         playersWrapper.add(playersPanel, BorderLayout.CENTER);
 
-        // ====== 하단 바(배경) ======
+        // ====== 하단 바 ======
         JPanel bottom = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -139,10 +140,9 @@ public class ClientGame extends JFrame {
 
         bottom.add(inputPanel, BorderLayout.NORTH);
         bottom.add(playersWrapper, BorderLayout.SOUTH);
-
         add(bottom, BorderLayout.SOUTH);
 
-        // ===== 서버 이벤트 연결 =====
+        // ========= 서버 이벤트 =========
 
         gameController.setOnWord(wordBoard::setWord);
 
@@ -155,7 +155,6 @@ public class ClientGame extends JFrame {
             for (PlayerCard card : playerCards) {
                 if (card.getPlayerName().equals(name) && !card.isDead()) {
                     card.setTurn(true);
-                    break;
                 }
             }
 
@@ -182,24 +181,18 @@ public class ClientGame extends JFrame {
 
         gameController.setOnGameOver(winner -> {
 
-            // 1) 클라이언트에서 PlayerCard 순서로 순위 생성
             List<String> ranks = new ArrayList<>();
-            for (PlayerCard card : playerCards) {
+            for (PlayerCard card : playerCards)
                 if (!card.isDead()) ranks.add(card.getPlayerName());
-            }
 
-            // 죽은 사람들도 순위 뒤에 추가
-            for (PlayerCard card : playerCards) {
+            for (PlayerCard card : playerCards)
                 if (card.isDead()) ranks.add(card.getPlayerName());
-            }
 
-            // 2) RankingDialog 표시
             new RankingDialog(this, ranks);
 
             dispose();
             if (onGameFinished != null) onGameFinished.run();
         });
-
 
         gameController.setOnInvalidWord(data -> {
             String[] parts = data.split(":", 2);
@@ -227,7 +220,6 @@ public class ClientGame extends JFrame {
         showCountdownOverlay();
     }
 
-
     private void showCountdownOverlay() {
         JWindow overlay = new JWindow(this);
         overlay.setSize(getWidth(), getHeight());
@@ -238,7 +230,7 @@ public class ClientGame extends JFrame {
         overlay.add(panel);
 
         JLabel text = new JLabel("", SwingConstants.CENTER);
-        text.setFont(new Font("맑은 고딕", Font.BOLD, 120));
+        text.setFont(Fonts.TITLE.deriveFont(120f));     // ★ 폰트 변경
         text.setForeground(Color.WHITE);
         panel.add(text, BorderLayout.CENTER);
 
@@ -309,7 +301,7 @@ public class ClientGame extends JFrame {
         overlay.add(panel);
 
         JLabel label = new JLabel("LEVEL " + newLevel, SwingConstants.CENTER);
-        label.setFont(new Font("맑은 고딕", Font.BOLD, 120));
+        label.setFont(Fonts.TITLE.deriveFont(120f));       // ★ 폰트 변경
         label.setForeground(Color.YELLOW);
         panel.add(label, BorderLayout.CENTER);
 

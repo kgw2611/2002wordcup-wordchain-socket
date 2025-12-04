@@ -234,7 +234,7 @@ public class ClientRoom extends JFrame {
         cell.setBorder(BorderFactory.createLineBorder(Colors.BORDER, 2));
 
         JLabel empty = new JLabel("빈 자리", SwingConstants.CENTER);
-        empty.setFont(new Font("맑은 고딕", Font.BOLD, 22));
+        empty.setFont(Fonts.LABEL);
         empty.setForeground(Colors.BORDER);
 
         cell.add(empty, BorderLayout.CENTER);
