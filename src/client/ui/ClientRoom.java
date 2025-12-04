@@ -8,6 +8,7 @@ import client.viewModel.MainViewModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.*;
 import java.util.List;
 
 public class ClientRoom extends JFrame {
@@ -23,6 +24,7 @@ public class ClientRoom extends JFrame {
     private JButton readyBtn;
 
     private boolean isReady = false;
+    private Map<String, Boolean> readyMap = new HashMap<>(); // 준비 상태 저장
 
     public ClientRoom( MainViewModel viewModel, RoomController controller) {
         this.viewModel = viewModel;
@@ -49,6 +51,9 @@ public class ClientRoom extends JFrame {
         readyBtn.addActionListener(e -> {
             isReady = !isReady;
             controller.sendReady();
+
+            String myName = viewModel.getPlayer().getName();
+            readyMap.put(myName, isReady);
             
             if(isReady) {
                 readyBtn.setText("준비 취소");
@@ -195,14 +200,17 @@ public class ClientRoom extends JFrame {
                 JPanel cell = new JPanel(new BorderLayout());
                 cell.setOpaque(false);
                 cell.setBorder(BorderFactory.createLineBorder(Colors.BORDER, 2));
-                cell.add(new PlayerPanel(p, isSelf,this, viewModel), BorderLayout.CENTER);
 
+                PlayerPanel pp = new PlayerPanel(p, isSelf, this, viewModel);
+                cell.add(pp, BorderLayout.CENTER);
                 slotPanel.add(cell);
 
             } else {
                 slotPanel.add(makeSlotCell());
             }
         }
+
+        applyReadyStates(players);
 
         slotPanel.revalidate();
         slotPanel.repaint();
@@ -246,8 +254,8 @@ public class ClientRoom extends JFrame {
 
     private void updateReadyStates(String data) {
 
-
         List<PlayerInfo> players = viewModel.getPlayers();
+        String myName = viewModel.getPlayer().getName();
 
         String[] arr = data.split(";");
 
@@ -258,16 +266,42 @@ public class ClientRoom extends JFrame {
             String name = parts[0];
             boolean ready = Boolean.parseBoolean(parts[1]);
 
-            // 슬롯에서 찾기
+            // 준비 상태 갱신 + 버튼 텍스트 동기화
+            readyMap.put(name, ready);
+            if (name.equals(myName)) {
+                isReady = ready;
+                readyBtn.setText(isReady ? "준비 취소" : "준비 완료");
+            }
+
+            // 슬롯에서 찾기 + 그래픽 처리
             for (int i = 0; i < players.size(); i++) {
                 if (players.get(i).getName().equals(name)) {
 
                     JPanel cell = (JPanel) slotPanel.getComponent(i);
-                    PlayerPanel pp = (PlayerPanel) cell.getComponent(0);
+                    if (cell.getComponentCount() == 0) continue;
 
-                    pp.updateReadyState(ready);
+                    Component inner = cell.getComponent(0);
+                    if (inner instanceof PlayerPanel pp) {
+                        pp.updateReadyState(ready);
+                    }
                 }
             }
         }
     }
+
+    private void applyReadyStates(List<PlayerInfo> players) {
+        for (int i = 0; i < players.size(); i++) {
+            PlayerInfo p = players.get(i);
+            boolean ready = readyMap.getOrDefault(p.getName(), false);
+
+            JPanel cell = (JPanel) slotPanel.getComponent(i);
+            if (cell.getComponentCount() == 0) continue;
+
+            Component inner = cell.getComponent(0);
+            if (inner instanceof PlayerPanel pp) {
+                pp.updateReadyState(ready);
+            }
+        }
+    }
+
 }
