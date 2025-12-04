@@ -30,7 +30,7 @@ public class TimerBar extends JPanel {
         bar = new JProgressBar(0, sec);
         bar.setValue(sec);
         bar.setStringPainted(false);
-        bar.setForeground(new Color(0, 200, 0));
+        bar.setForeground( new Color(120, 170, 120));
         bar.setPreferredSize(new Dimension(800, 30));
         add(bar, BorderLayout.CENTER);
 
@@ -55,11 +55,11 @@ public class TimerBar extends JPanel {
         bar.setValue(time);
 
         if (time <= 3) {
-            bar.setForeground(Color.RED);
+            bar.setForeground(new Color(200, 80, 80));
         } else if (time <= 5) {
-            bar.setForeground(new Color(255, 140, 0));
+            bar.setForeground(new Color(220, 140, 70));
         } else {
-            bar.setForeground(new Color(0, 200, 0));
+            bar.setForeground( new Color(120, 170, 120));
         }
     }
 
@@ -69,7 +69,7 @@ public class TimerBar extends JPanel {
         timeLabel.setText(sec + "초");
         bar.setMaximum(sec);
         bar.setValue(sec);
-        bar.setForeground(new Color(0, 200, 0));
+        bar.setForeground( new Color(120, 170, 120));
         timer.start();
     }
 

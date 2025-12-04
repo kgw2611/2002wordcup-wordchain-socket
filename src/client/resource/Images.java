@@ -21,6 +21,18 @@ public class Images {
             new ImageIcon("src/client/resource/PlayerImage3.png");
     public static final ImageIcon GAME_BACKGROUND=
             new ImageIcon("src/client/resource/GameBackground.png");
+    public static final ImageIcon GAME_BACKGROUND2=
+            new ImageIcon("src/client/resource/GameBackground2.png");
+    public static final ImageIcon WordBoard=
+            new ImageIcon("src/client/resource/WordBoard.jpg");
+    public static final ImageIcon First=
+            new ImageIcon("src/client/resource/First.png");
+    public static final ImageIcon Second=
+            new ImageIcon("src/client/resource/Second.png");
+    public static final ImageIcon Third=
+            new ImageIcon("src/client/resource/Third.png");
+    public static final ImageIcon Loser=
+            new ImageIcon("src/client/resource/Loser.png");
     private static final Map<String, ImageIcon> CHARACTER_MAP = new HashMap<>();
 
     static {

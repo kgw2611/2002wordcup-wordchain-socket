@@ -1,5 +1,6 @@
 package client.ui;
 
+import client.resource.Fonts;
 import client.resource.Images;
 
 import javax.swing.*;
@@ -11,105 +12,189 @@ public class RankingDialog extends JDialog {
     public RankingDialog(JFrame parent, List<String> ranks) {
         super(parent, "게임 순위", true);
 
-        setSize(500, 600);
+        setSize(520, 650);
         setLocationRelativeTo(parent);
-        setLayout(new BorderLayout());
 
-        // ===== 상단 타이틀 =====
+        JPanel container = new JPanel(new BorderLayout());
+        container.setBackground(new Color(250, 245, 235));
+        add(container);
+
+        // =======================
+        //        타이틀
+        // =======================
         JLabel title = new JLabel("게임 순위", SwingConstants.CENTER);
-        title.setFont(new Font("맑은 고딕", Font.BOLD, 36));
-        title.setForeground(new Color(90, 70, 50));
-        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
-        add(title, BorderLayout.NORTH);
+        title.setFont(Fonts.TITLE.deriveFont(45f));
+        title.setForeground(new Color(90, 60, 40));
+        title.setBorder(BorderFactory.createEmptyBorder(25, 0, 30, 0));
+        container.add(title, BorderLayout.NORTH);
 
-        // ===== 메인 Podium Panel =====
-        JPanel podiumPanel = new JPanel(null);
-        podiumPanel.setOpaque(false);
+        // ====== 메인 랭킹 리스트 ======
+        JPanel listPanel = new JPanel();
+        listPanel.setOpaque(false);
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
 
-        add(podiumPanel, BorderLayout.CENTER);
+// 리스트 패널 래퍼
+        JPanel listWrapper = new JPanel(new BorderLayout());  // ← 수정됨!
+        listWrapper.setOpaque(false);
+        listWrapper.setBorder(BorderFactory.createEmptyBorder(0, 30, 0, 30));
+        listWrapper.add(listPanel, BorderLayout.CENTER);
 
-        // 포디움 높이
-        int h1 = 180; // 1등
-        int h2 = 140; // 2등
-        int h3 = 120; // 3등
+// ★★★ 스크롤 추가 ★★★
+        JScrollPane scroll = new JScrollPane(listWrapper);
+        scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
 
-        int baseY = 350;
+// 🚫 가로 스크롤 완전 제거
+        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        // ===== 1등 =====
-        podiumPanel.add(makeRankBox(
-                ranks.size() > 0 ? ranks.get(0) : "",
-                1,
-                180,
-                baseY - h1,
-                h1,
-                new Color(255, 230, 170)
-        ));
+// 세로스크롤만
+        scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-        // ===== 2등 =====
-        podiumPanel.add(makeRankBox(
-                ranks.size() > 1 ? ranks.get(1) : "",
-                2,
-                50,
-                baseY - h2,
-                h2,
-                new Color(240, 220, 200)
-        ));
+// 스크롤바 디자인
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.getVerticalScrollBar().setPreferredSize(new Dimension(10, 0));
+        scroll.getVerticalScrollBar().setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors() {
+                this.thumbColor = new Color(180, 160, 130);
+                this.trackColor = new Color(240, 235, 220);
+            }
+        });
 
-        // ===== 3등 =====
-        podiumPanel.add(makeRankBox(
-                ranks.size() > 2 ? ranks.get(2) : "",
-                3,
-                310,
-                baseY - h3,
-                h3,
-                new Color(240, 220, 200)
-        ));
+// 중앙에 삽입
+        container.add(scroll, BorderLayout.CENTER);
 
-        // 닫기 버튼
-        JButton closeBtn = new JButton("닫기");
-        closeBtn.setFont(new Font("맑은 고딕", Font.BOLD, 18));
-        closeBtn.setBackground(new Color(200, 170, 130));
-        closeBtn.setForeground(Color.WHITE);
 
-        closeBtn.addActionListener(e -> dispose());
+
+        // 💡 사용자 수만큼만 추가!
+        for (int i = 0; i < ranks.size(); i++) {
+            listPanel.add(makeRankRow(i + 1, ranks.get(i)));
+            listPanel.add(Box.createVerticalStrut(22));
+        }
+
+        // =======================
+        //      닫기 버튼
+        // =======================
+        JButton btnLobby = new JButton("대기방으로 이동");
+        btnLobby.setFont(Fonts.NORMAL.deriveFont(20f));
+        btnLobby.setBackground(new Color(180, 150, 110));  // 기존 스타일 유지
+        btnLobby.setForeground(Color.WHITE);
+        btnLobby.setFocusPainted(false);
+        btnLobby.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
+        btnLobby.addActionListener(e -> dispose());
+
+        JButton btnExit = new JButton("게임 종료");
+        btnExit.setFont(Fonts.NORMAL.deriveFont(20f));
+        btnExit.setBackground(new Color(200, 90, 70));  // 종료는 경고 느낌의 레드/브라운 톤
+        btnExit.setForeground(Color.WHITE);
+        btnExit.setFocusPainted(false);
+        btnExit.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
+        btnExit.addActionListener(e -> System.exit(0));
 
         JPanel bottom = new JPanel();
         bottom.setOpaque(false);
-        bottom.add(closeBtn);
-        add(bottom, BorderLayout.SOUTH);
+        bottom.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
+        bottom.add(btnLobby);
+        bottom.add(Box.createHorizontalStrut(20)); // 버튼 간 간격
+        bottom.add(btnExit);
+
+        container.add(bottom, BorderLayout.SOUTH);
 
         setVisible(true);
     }
 
-    // ===== 포디움 박스 만드는 함수 =====
-    private JPanel makeRankBox(String name, int rank, int x, int y, int h, Color color) {
+    // ==========================
+    //      한 줄 랭킹 패널
+    // ==========================
+    private JPanel makeRankRow(int rank, String name) {
 
-        JPanel box = new JPanel(null);
-        box.setBounds(x, y, 140, h);
-        box.setBackground(color);
-        box.setOpaque(true);
-        box.setBorder(BorderFactory.createLineBorder(new Color(150, 120, 80), 3));
+        // 💡 배경색 통일 (중앙 UI와 어울리는 톤)
+        Color rowColor = new Color(255, 250, 240);
 
-        // 왕관/순위
-        JLabel rankLabel = new JLabel();
+        RoundedPanel row = new RoundedPanel(rowColor);
+        row.setPreferredSize(new Dimension(450, 110));
 
-        if (rank == 1) rankLabel.setText("👑 1등");
-        else if (rank == 2) rankLabel.setText("2등");
-        else rankLabel.setText("3등");
+        // ===== 메달 영역 =====
+        JLabel medal = new JLabel("", SwingConstants.CENTER);
+        medal.setPreferredSize(new Dimension(130, 110));
 
-        rankLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        rankLabel.setFont(new Font("맑은 고딕", Font.BOLD, 20));
-        rankLabel.setBounds(0, 10, 140, 30);
-        rankLabel.setForeground(new Color(100, 60, 40));
-        box.add(rankLabel);
+        Icon icon;
+        if (rank == 1) icon = Images.First;
+        else if (rank == 2) icon = Images.Second;
+        else if (rank == 3) icon = Images.Third;
+        else icon = Images.Loser;
 
-        // 플레이어 이름
-        JLabel nameLabel = new JLabel(name, SwingConstants.CENTER);
-        nameLabel.setFont(new Font("맑은 고딕", Font.BOLD, 18));
-        nameLabel.setBounds(0, h - 50, 140, 30);
-        nameLabel.setForeground(new Color(70, 50, 40));
-        box.add(nameLabel);
+        // 이미지 크기 조정
+        Image originalImage = ((ImageIcon) icon).getImage();
+        Image scaled = originalImage.getScaledInstance(85, 85, Image.SCALE_SMOOTH);
+        medal.setIcon(new ImageIcon(scaled));
 
-        return box;
+        JPanel medalWrap = new JPanel(new GridBagLayout());
+        medalWrap.setOpaque(false);
+        medalWrap.add(medal);
+
+        row.add(medalWrap, BorderLayout.WEST);
+
+        // ===== 이름 =====
+        JLabel nameLabel = new JLabel(name);
+        nameLabel.setFont(Fonts.TITLE.deriveFont(32f));
+        nameLabel.setForeground(new Color(80, 50, 40));
+        nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
+        row.add(nameLabel, BorderLayout.CENTER);
+
+        return row;
     }
+
+    // ==========================
+    //       둥근 패널
+    // ==========================
+    private static class RoundedPanel extends JPanel {
+        private final Color bg;
+
+        public RoundedPanel(Color bg) {
+            this.bg = bg;
+            setOpaque(false);
+            setLayout(new BorderLayout());
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            int arc = 35;
+            int shadowOffset = 4;
+
+            // ===== 그림자 영역 =====
+            g2.setColor(new Color(0, 0, 0, 45)); // 은은한 그림자
+            g2.fillRoundRect(
+                    shadowOffset, shadowOffset,
+                    getWidth() - shadowOffset, getHeight() - shadowOffset,
+                    arc, arc
+            );
+
+            // ===== 메인 배경 =====
+            g2.setColor(bg);
+            g2.fillRoundRect(0, 0, getWidth() - shadowOffset, getHeight() - shadowOffset, arc, arc);
+
+            // ===== 테두리 =====
+            g2.setColor(new Color(180, 160, 120));
+            g2.setStroke(new BasicStroke(2));
+            g2.drawRoundRect(0, 0, getWidth() - shadowOffset - 1, getHeight() - shadowOffset - 1, arc, arc);
+
+            g2.dispose();
+        }
+    }
+
+    /*public static void main(String[] args) {
+        // 더미 데이터 생성
+        java.util.List<String> dummyRanks = java.util.Arrays.asList("Player1", "Player2", "Player3", "Player4");
+
+        // Swing 컴포넌트는 Event Dispatch Thread(EDT)에서 실행해야 함
+        SwingUtilities.invokeLater(() -> {
+            // 부모 프레임 없이 null로 실행해도 됨
+            new RankingDialog(null, dummyRanks);
+        });
+    }*/
 }

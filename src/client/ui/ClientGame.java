@@ -10,6 +10,7 @@ import client.ui.gamePanel.WordBoard;
 
 import javax.swing.*;
 import java.awt.*;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,15 +38,8 @@ public class ClientGame extends JFrame {
         setLayout(new BorderLayout());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        JPanel backgroundPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.drawImage(Images.GAME_BACKGROUND.getImage(), 0, 0, getWidth(), getHeight(), this);
-            }
-        };
-        backgroundPanel.setLayout(new BorderLayout());
-        setContentPane(backgroundPanel);
+
+
 
         // ====== 상단 ======
         timerBar = new TimerBar(gameController.getLevelTime(), () -> {
@@ -67,7 +61,11 @@ public class ClientGame extends JFrame {
         wordBoard = new WordBoard();
         JPanel centerWrapper = new JPanel(new BorderLayout());
         centerWrapper.setOpaque(false);
-        centerWrapper.setBorder(BorderFactory.createEmptyBorder(30, 80, 30, 80));
+
+
+        centerWrapper.setBorder(BorderFactory.createEmptyBorder(20, 80, 20, 80));
+        wordBoard.setPreferredSize(new Dimension(800, 400));
+
         centerWrapper.add(wordBoard, BorderLayout.CENTER);
         add(centerWrapper, BorderLayout.CENTER);
 
@@ -136,7 +134,7 @@ public class ClientGame extends JFrame {
             }
         };
         bottom.setOpaque(false);
-        bottom.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
+        bottom.setBorder(BorderFactory.createEmptyBorder(4, 20, 4, 20));
 
         bottom.add(inputPanel, BorderLayout.NORTH);
         bottom.add(playersWrapper, BorderLayout.SOUTH);
@@ -317,4 +315,6 @@ public class ClientGame extends JFrame {
     public void setOnGameFinished(Runnable onGameFinished) {
         this.onGameFinished = onGameFinished;
     }
+
+
 }

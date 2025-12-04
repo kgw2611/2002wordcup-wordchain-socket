@@ -3,6 +3,7 @@ package client.ui.gamePanel;
 import javax.swing.*;
 import java.awt.*;
 import client.resource.Fonts;
+import client.resource.Images;  // ★ 이미지 불러오기용
 
 public class WordBoard extends JPanel {
 
@@ -11,16 +12,20 @@ public class WordBoard extends JPanel {
     private String lastValidWord;
 
     public WordBoard() {
-        setBackground(new Color(50, 80, 50));
+
+        // ★ 갈색 테두리는 그대로 유지
         setBorder(BorderFactory.createLineBorder(new Color(120, 70, 20), 10));
 
+        // 투명하게 설정 → 이미지가 보이도록
+        setOpaque(false);
+
         wordLabel = new JLabel("-", SwingConstants.CENTER);
-        wordLabel.setFont(Fonts.TITLE.deriveFont(40f));    // ★ 폰트 변경
+        wordLabel.setFont(Fonts.TITLE.deriveFont(40f));
         wordLabel.setForeground(Color.WHITE);
 
         lastWordLabel = new JLabel("마지막 단어: -", SwingConstants.RIGHT);
-        lastWordLabel.setFont(Fonts.NORMAL.deriveFont(14f));   // ★ 폰트 변경
-        lastWordLabel.setForeground(new Color(220, 220, 220));
+        lastWordLabel.setFont(Fonts.NORMAL.deriveFont(14f));
+        lastWordLabel.setForeground(new Color(230, 230, 230));
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
@@ -29,6 +34,15 @@ public class WordBoard extends JPanel {
         setLayout(new BorderLayout());
         add(wordLabel, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    /* 🔥 여기서 배경 이미지를 직접 그린다 */
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        Image img = Images.WordBoard.getImage(); // ★ 새로 추가할 이미지 리소스
+        g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
     }
 
     public void setWord(String word) {
