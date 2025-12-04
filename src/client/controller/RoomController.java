@@ -25,9 +25,14 @@ public class RoomController {
         this.viewModel = vm;
         this.socket = new ClientSocket();
         this.port = port;
+
+        // 🔥 ViewModel → RoomController → Server 로 캐릭터 선택 전달
+        viewModel.setOnCharacterChangedListener(type -> {
+            String msg = "CHARACTER:" + viewModel.getPlayer().getName() + ":" + type;
+            socket.sendMessage(msg);
+        });
     }
 
-    // Getter: ClientRoom → ClientGame 전달 위함
     public GameController getGameController() {
         return gameController;
     }
@@ -43,7 +48,7 @@ public class RoomController {
 
     private void handleMessage(String msg) {
 
-        // 🧡 대기방 플레이어 목록
+        // 🧡 플레이어 목록
         if (msg.startsWith("PLAYER_LIST:")) {
             List<PlayerInfo> list = parsePlayers(msg.substring(12));
             viewModel.updatePlayers(list);
@@ -51,87 +56,127 @@ public class RoomController {
             return;
         }
 
-        // 🧡 READY 리스트
+        // 🔥 캐릭터 업데이트
+        if (msg.startsWith("CHARACTER_UPDATE:")) {
+            // FORMAT → CHARACTER_UPDATE:홍길동:TYPE2
+            String[] sp = msg.split(":");
+            if (sp.length == 3) {
+                String name = sp[1];
+                String type = sp[2];
+
+                for (PlayerInfo p : viewModel.getPlayers()) {
+                    if (p.getName().equals(name)) {
+                        p.setCharacterType(type);
+                    }
+                }
+
+                if (onPlayersChanged != null) onPlayersChanged.accept(viewModel.getPlayers());
+            }
+            return;
+        }
+
+        // READY 리스트
         if (msg.startsWith("PLAYER_READY_LIST:")) {
             if (onPlayerReady != null) onPlayerReady.accept(msg.substring(18));
             return;
         }
 
-        // 🧡 채팅
+        // 채팅
         if (msg.startsWith("CHAT:")) {
-            String chatContent = msg.substring(5);
-            if (onChat != null) onChat.accept(chatContent);
+            if (onChat != null) onChat.accept(msg.substring(5));
             return;
         }
 
-        // 시스템 메시지
         if(msg.startsWith("[SYSTEM]")) {
             if (onChat != null) onChat.accept(msg);
             return;
         }
 
-        // 🧡 게임 시작
         if (msg.equals("GAME_START")) {
-
-            // GameController 생성
             gameController = new GameController(socket);
-
-            // ClientRoom으로 신호
             if (onGameStart != null) onGameStart.run();
             return;
         }
 
-        // 🧡 게임 내부 메시지 처리 (게임 시작 후)
         if (gameController != null) handleGameMessage(msg);
     }
 
     private void handleGameMessage(String msg) {
-
-        if (msg.startsWith("WORD_INVALID:")) {
-            // "이름:단어" 부분만 잘라서 GameController로 전달
-            gameController.triggerInvalidWord(msg.substring(13));
-            return;
-        }
-
-        // TURN:이름
         if (msg.startsWith("TURN:")) {
-            gameController.triggerTurn(msg.substring(5));
+            String name = msg.substring(5);
+            gameController.triggerTurn(name);
             return;
         }
 
-        // WORD:사과
+        // 단어 표시
         if (msg.startsWith("WORD:")) {
-            String word = msg.substring(5).trim();
-            gameController.triggerWord(word);
+            String w = msg.substring(5);
+            gameController.triggerWord(w);
             return;
         }
 
-        // LIFE_LOST:홍길동
+        // 잘못된 단어
+        if (msg.startsWith("WORD_INVALID:")) {
+            String data = msg.substring(13);
+            gameController.triggerInvalidWord(data);
+            return;
+        }
+
+        // 목숨 감소
         if (msg.startsWith("LIFE_LOST:")) {
-            gameController.triggerLifeLost(msg.substring(10));
+            String name = msg.substring(10);
+            gameController.triggerLifeLost(name);
             return;
         }
 
-        // GAME_OVER:이름
-        if (msg.startsWith("GAME_OVER:")) {
-            gameController.triggerGameOver(msg.substring(10));
-            return;
-        }
-
-        // LEVEL_UP:2
+        // 레벨업
         if (msg.startsWith("LEVEL_UP:")) {
             int lv = Integer.parseInt(msg.substring(9));
             gameController.triggerLevelUp(lv);
+            return;
+        }
+
+        // 게임 종료
+        if (msg.startsWith("GAME_OVER:")) {
+            String winner = msg.substring(10);
+            gameController.triggerGameOver(winner);
+            return;
         }
     }
 
     private List<PlayerInfo> parsePlayers(String raw) {
+
         List<PlayerInfo> list = new ArrayList<>();
-        for (String s : raw.split(",")) {
-            if (!s.isEmpty()) list.add(new PlayerInfo(s));
+
+        String[] names = raw.split(",");
+
+        for (String name : names) {
+            if (name.isEmpty()) continue;
+
+            // 기존 VM에 있는 플레이어 찾기
+            PlayerInfo existing = null;
+            for (PlayerInfo p : viewModel.getPlayers()) {
+                if (p.getName().equals(name)) {
+                    existing = p;
+                    break;
+                }
+            }
+
+            if (existing != null) {
+                // 🔥 기존 객체 그대로 사용 (캐릭터 타입 유지)
+                list.add(existing);
+
+            } else {
+                // 🔥 새 플레이어 → DEFAULT 캐릭터로 추가
+                PlayerInfo newP = new PlayerInfo(name);
+                newP.setCharacterType("DEFAULT");
+                list.add(newP);
+            }
         }
+
         return list;
     }
+
 
     public void joinRoom() {
         socket.sendMessage("JOIN:" + viewModel.getPlayer().getName());

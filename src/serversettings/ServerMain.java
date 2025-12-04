@@ -139,6 +139,25 @@ public class ServerMain {
                         broadcast(msg);
                         continue;
                     }
+                    // CHARACTER
+                    if (msg.startsWith("CHARACTER:")) {
+                        // FORMAT: CHARACTER:홍길동:TYPE1
+                        String[] sp = msg.split(":");
+                        if (sp.length == 3) {
+                            String name = sp[1];
+                            String type = sp[2];
+
+
+                            // playerCharacters.put(name, type);
+
+                            // 모든 클라이언트에게 캐릭터 변경 브로드캐스트
+                            broadcast("CHARACTER_UPDATE:" + name + ":" + type);
+                            System.out.println("[SERVER] CHARACTER_UPDATE " + name + " -> " + type);
+                        }
+                        continue;
+                    }
+
+
 
                     // READY
                     if (msg.startsWith("READY:")) {

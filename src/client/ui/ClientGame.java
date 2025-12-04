@@ -2,6 +2,7 @@ package client.ui;
 
 import client.controller.GameController;
 import client.model.PlayerInfo;
+import client.resource.Images;
 import client.ui.gamePanel.PlayerCard;
 import client.ui.gamePanel.TimerBar;
 import client.ui.gamePanel.WordBoard;
@@ -58,10 +59,10 @@ public class ClientGame extends JFrame {
         // ====== 중앙 칠판 ======
         wordBoard = new WordBoard();
 
-// 가운데 전체를 칠판이 가로로 꽉 채우도록
+
         JPanel centerWrapper = new JPanel(new BorderLayout());
         centerWrapper.setOpaque(false);
-// 좌우 여백만 남기고 꽉 채우기
+
         centerWrapper.setBorder(BorderFactory.createEmptyBorder(30, 80, 30, 80));
         centerWrapper.add(wordBoard, BorderLayout.CENTER);
 
@@ -93,9 +94,7 @@ public class ClientGame extends JFrame {
         playersPanel.setOpaque(false);
 
         for (PlayerInfo p : players) {
-            ImageIcon icon = new ImageIcon(
-                    getClass().getClassLoader().getResource("client/resource/PlayerImage.png")
-            );
+            ImageIcon icon = Images.getCharacter(p.getCharacterType());
             boolean isSelf = p.getName().equals(myName);
 
             PlayerCard card = new PlayerCard(p.getName(), icon, isSelf);
@@ -180,10 +179,25 @@ public class ClientGame extends JFrame {
         });
 
         gameController.setOnGameOver(winner -> {
-            JOptionPane.showMessageDialog(this, winner + "님 승리!");
+
+            // 1) 클라이언트에서 PlayerCard 순서로 순위 생성
+            List<String> ranks = new ArrayList<>();
+            for (PlayerCard card : playerCards) {
+                if (!card.isDead()) ranks.add(card.getPlayerName());
+            }
+
+            // 죽은 사람들도 순위 뒤에 추가
+            for (PlayerCard card : playerCards) {
+                if (card.isDead()) ranks.add(card.getPlayerName());
+            }
+
+            // 2) RankingDialog 표시
+            new RankingDialog(this, ranks);
+
             dispose();
             if (onGameFinished != null) onGameFinished.run();
         });
+
 
         gameController.setOnInvalidWord(data -> {
             String[] parts = data.split(":", 2);

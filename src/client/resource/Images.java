@@ -1,6 +1,8 @@
 package client.resource;
 
 import javax.swing.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Images {
     public static final ImageIcon MAIN_BG =
@@ -13,4 +15,25 @@ public class Images {
             new ImageIcon("src/client/resource/full_heart.png");
     public static final ImageIcon EMPTY_HEART=
             new ImageIcon("src/client/resource/empty_heart.png");
+    public static final ImageIcon PLAYER2_IMG=
+            new ImageIcon("src/client/resource/PlayerImage2.png");
+    public static final ImageIcon PLAYER3_IMG=
+            new ImageIcon("src/client/resource/PlayerImage3.png");
+    private static final Map<String, ImageIcon> CHARACTER_MAP = new HashMap<>();
+
+    static {
+        CHARACTER_MAP.put("DEFAULT", PLAYER_IMG);
+        CHARACTER_MAP.put("TYPE1", PLAYER2_IMG);
+        CHARACTER_MAP.put("TYPE2", PLAYER3_IMG);
+
+
+        // 필요하면 더 추가 가능
+        // CHARACTER_MAP.put("DIE", PLAYER_DIE);
+    }
+
+    // 🔥 캐릭터 아이디로 이미지 가져오는 메서드
+    public static ImageIcon getCharacter(String type) {
+        return CHARACTER_MAP.getOrDefault(type, PLAYER_IMG);
+    }
 }
+
