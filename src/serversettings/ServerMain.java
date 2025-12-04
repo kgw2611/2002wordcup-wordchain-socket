@@ -80,7 +80,10 @@ public class ServerMain {
         if (alive.size() == 1) {
             broadcast("GAME_OVER:" + alive.get(0));
             gameStarted = false;
-            resetReady();
+
+            resetReady(); // 준비 상태 초기화
+            resetGameState(); // 게임 진행 상태 초기화
+
             return;
         }
 
@@ -95,7 +98,8 @@ public class ServerMain {
             idx = (idx + 1) % alive.size();
         }
 
-        broadcast("TURN:" + alive.get(idx));
+        String next = alive.get(idx);
+        broadcast("TURN:" + next);
     }
 
     // ==== 클라이언트 핸들러 ====
@@ -172,7 +176,6 @@ public class ServerMain {
                         broadcastReadyList();
 
                         if (allReady()) {
-                            gameStarted = true;
                             broadcast("[SYSTEM] 모든 인원이 준비되었습니다. 3초 후 게임이 시작됩니다.");
 
                             // 3초 대기 후 게임 시작
@@ -181,20 +184,17 @@ public class ServerMain {
                                     Thread.sleep(3000); // 3초 대기
                                 } catch (InterruptedException ignored) {}
 
-                                // 사용된 단어 사전 초기화
-                                synchronized (usedWords) {
-                                    usedWords.clear();
+                                // 게임 초기화
+                                synchronized (ServerMain.class) {
+                                    resetGameState();
+                                    gameStarted = true;
+
+                                    List<String> alive = getAlivePlayers();
+                                    if (alive.isEmpty()) return;
+
+                                    broadcast("GAME_START");
+                                    broadcast("TURN:" + alive.get(0));
                                 }
-
-                                List<String> alive = getAlivePlayers();
-                                if (alive.isEmpty()) return;
-                                lastWord = null;
-
-                                turnIndex = 0;
-                                level = 1;
-                                wordCount = 0;
-                                broadcast("GAME_START");
-                                broadcast("TURN:" + alive.get(0));
                             }).start();
                         }
                         continue;
@@ -264,6 +264,9 @@ public class ServerMain {
 
                     // TIMEOUT → LIFE_LOST 처리
                     if (msg.equals("TIMEOUT")) {
+
+                        // 죽은 사람은 제외
+                        if (lives.get(playerName) <= 0) continue;
 
                         int remain = lives.get(playerName) - 1;
                         lives.put(playerName, remain);
@@ -346,5 +349,26 @@ public class ServerMain {
             c.isReady = false;
         }
         broadcastReadyList();
+    }
+
+    // 게임 초기화
+    private static synchronized void resetGameState() {
+        // 마지막 단어 / 레벨 / 단어 수
+        lastWord = null;
+        level = 1;
+        wordCount = 0;
+
+        // 사용된 단어들 비우기
+        synchronized (usedWords) {
+            usedWords.clear();
+        }
+
+        // 모든 플레이어 목숨을 3으로 리셋
+        for (ClientHandler c : clients) {
+            lives.put(c.playerName, 3);
+        }
+
+        // 턴 초기화
+        turnIndex = 0;
     }
 }
