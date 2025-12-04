@@ -16,6 +16,7 @@ public class ClientMain extends JFrame {
     private MainViewModel viewModel;
 
     public ClientMain() {
+        MusicPlayer.playLoop("src/client/resource/BackgroundMusic.mp3");
         viewModel = new MainViewModel();
 
         setTitle("끝말잇기");
@@ -141,5 +142,9 @@ public class ClientMain extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new ClientMain().setVisible(true));
+
+
+
+
     }
 }

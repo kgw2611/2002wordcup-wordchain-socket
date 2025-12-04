@@ -2,6 +2,7 @@ package client.ui;
 
 import client.resource.Fonts;
 import client.resource.Images;
+import client.resource.MusicPlayer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -90,7 +91,10 @@ public class RankingDialog extends JDialog {
         btnExit.setForeground(Color.WHITE);
         btnExit.setFocusPainted(false);
         btnExit.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
-        btnExit.addActionListener(e -> System.exit(0));
+        btnExit.addActionListener(e -> {
+            MusicPlayer.stop();
+            System.exit(0);
+        });
 
         JPanel bottom = new JPanel();
         bottom.setOpaque(false);
