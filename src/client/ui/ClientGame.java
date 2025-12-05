@@ -7,6 +7,7 @@ import client.resource.Images;
 import client.ui.gamePanel.PlayerCard;
 import client.ui.gamePanel.TimerBar;
 import client.ui.gamePanel.WordBoard;
+import client.ui.gamePanel.WordHistoryPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,6 +27,7 @@ public class ClientGame extends JFrame {
     private JTextField input;
     private boolean myTurnNow = false;
     private JLabel levelLabel;
+    private WordHistoryPanel historyPanel;
 
     public ClientGame(String myName, GameController gameController, List<PlayerInfo> players) {
 
@@ -67,6 +69,12 @@ public class ClientGame extends JFrame {
         wordBoard.setPreferredSize(new Dimension(800, 400));
 
         centerWrapper.add(wordBoard, BorderLayout.CENTER);
+        add(centerWrapper, BorderLayout.CENTER);
+
+        // 이전 단어 패널
+        historyPanel = new WordHistoryPanel();
+        centerWrapper.add(historyPanel, BorderLayout.SOUTH);
+
         add(centerWrapper, BorderLayout.CENTER);
 
         // ====== 입력창 ======
@@ -142,7 +150,10 @@ public class ClientGame extends JFrame {
 
         // ========= 서버 이벤트 =========
 
-        gameController.setOnWord(wordBoard::setWord);
+        gameController.setOnWord(word -> {
+            wordBoard.setWord(word);      // 기존 칠판 갱신
+            historyPanel.addWord(word);   // 최근 단어 갱신
+        });
 
         gameController.setOnTurn(name -> {
 
