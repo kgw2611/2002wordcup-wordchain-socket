@@ -7,6 +7,12 @@ import client.viewModel.MainViewModel;
 import javax.swing.*;
 import java.awt.*;
 
+/*
+    게임 첫 화면 프로그램
+    1. 이름 / 포트 입력
+    2. 올바른 포트라면 해당 포트의 게임 대기방 이동
+    3. 배경 화면 이미지, 폰트 처리
+*/
 public class ClientMain extends JFrame {
 
     private JTextField nameField;
@@ -107,6 +113,7 @@ public class ClientMain extends JFrame {
         enterBtn.addActionListener(e -> onEnterRoom());
     }
 
+    // 실제 소켓 연결 함수
     private void onEnterRoom() {
         String name = nameField.getText();
         String port = portField.getText();
@@ -142,9 +149,5 @@ public class ClientMain extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new ClientMain().setVisible(true));
-
-
-
-
     }
 }

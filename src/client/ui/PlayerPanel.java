@@ -7,6 +7,11 @@ import client.viewModel.MainViewModel;
 import javax.swing.*;
 import java.awt.*;
 
+/*
+    게임 대기방 내 플레이어 표시 패널 UI
+    1. 닉네임 / 캐릭터 / 준비 상태 / 캐릭터 변경 버튼으로 구성
+    2. 준비 완료 시 간단한 애니메이션 구현
+*/
 public class PlayerPanel extends JPanel {
 
     private JLabel nameLabel;
@@ -64,9 +69,7 @@ public class PlayerPanel extends JPanel {
         gbc.gridx = 1; gbc.gridy = 0;
         bg.add(nameLabel, gbc);
 
-        // ----------------------------
         //  캐릭터 변경 버튼
-        // ----------------------------
         JButton changeCharacterBtn = new JButton("캐릭터 변경");
 
         changeCharacterBtn.setFocusPainted(false);

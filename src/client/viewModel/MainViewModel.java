@@ -6,12 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/*
+    유저와 관련된 데이터를 저장하고 갱신하는 유저 뷰모델
+    1. PlayerInfo 형식의 데이터를 실제로 저장하는 부분
+    2. 입력 검증 역할 포함
+*/
 public class MainViewModel {
 
     private PlayerInfo selfPlayer;
     private final List<PlayerInfo> players = new ArrayList<>();
 
-    // 🔥 캐릭터 변경 시 RoomController가 받을 콜백
+    // 캐릭터 변경 시 RoomController가 받을 콜백
     private Consumer<String> onCharacterChanged;
 
     public MainViewModel() {
@@ -38,7 +43,7 @@ public class MainViewModel {
         players.addAll(newList);
     }
 
-    // 🔥 캐릭터 선택 처리
+    // 캐릭터 선택 처리
     public void setSelectedCharacter(String type) {
         selfPlayer.setCharacterType(type);
 
@@ -51,14 +56,12 @@ public class MainViewModel {
         return selfPlayer.getCharacterType();
     }
 
-    // 🔥 RoomController가 콜백 등록하는 함수
+    // RoomController가 콜백 등록하는 함수
     public void setOnCharacterChangedListener(Consumer<String> cb) {
         this.onCharacterChanged = cb;
     }
 
-    // --------------------------------------------------
     // 입력 검증
-    // --------------------------------------------------
     public boolean validateName(String name) {
         return name != null && !name.trim().isEmpty();
     }

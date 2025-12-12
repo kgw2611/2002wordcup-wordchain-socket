@@ -4,6 +4,13 @@ import javax.swing.*;
 import java.awt.*;
 import client.resource.Fonts;
 
+/*
+    게임 화면 하단의 플레이어 표시 UI
+    1. 캐릭터 이미지 / 닉네임 / 체력 으로 구성
+    2. 현재 차례 유저 강조 그래픽 처리
+    3. 자기 자신 강조 그래픽 처리
+    4. 체력 감소 시 / 사망 시 이미지 변경 및 애니메이션 구현
+*/
 public class PlayerCard extends JPanel {
 
     private JLabel arrowLabel;

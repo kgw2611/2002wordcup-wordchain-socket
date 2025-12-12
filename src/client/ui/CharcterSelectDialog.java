@@ -7,6 +7,11 @@ import client.viewModel.MainViewModel;
 import javax.swing.*;
 import java.awt.*;
 
+/*
+    캐릭터 선택 창을 띄우는 다이얼로그
+    1. 대기방의 [캐릭터 선택] 버튼을 클릭 시 동작
+    2. 캐릭터 이미지가 띄워지고, 그 중 하나를 클릭해 선택 가능
+*/
 public class CharcterSelectDialog extends JDialog {
 
     private String selectedId = null;  // 현재 선택된 캐릭터
@@ -86,7 +91,7 @@ public class CharcterSelectDialog extends JDialog {
         setVisible(true);
     }
 
-    // 🔥 패널 선택 UI 업데이트 (강조 + 확대 효과)
+    // 패널 선택 UI 업데이트 (강조 + 확대 효과)
     private void updateSelectionUI() {
 
         for (Component comp : grid.getComponents()) {
@@ -100,11 +105,11 @@ public class CharcterSelectDialog extends JDialog {
 
             if (id.equals(selectedId)) {
 
-                // 🔥 선택된 패널 스타일
+                // 선택된 패널 스타일
                 panel.setBackground(new Color(255, 210, 140));
                 panel.setBorder(BorderFactory.createLineBorder(new Color(200, 120, 40), 4));
 
-                // 🔥 이미지 확대
+                // 이미지 확대
                 imgLabel.setIcon(large);
 
             } else {

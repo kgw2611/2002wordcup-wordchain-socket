@@ -7,6 +7,11 @@ import java.awt.*;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+/*
+    게임 화면에서 이전 단어들을 보여주는 패널
+    1. 최대 5개 이전 단어 표시
+    2. 가장 최근 단어는 더 또렷하도록 그래픽 처리
+*/
 public class WordHistoryPanel extends JPanel {
 
     private static final int MAX_HISTORY = 5;

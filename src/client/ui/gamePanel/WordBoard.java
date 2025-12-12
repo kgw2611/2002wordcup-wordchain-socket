@@ -5,6 +5,13 @@ import java.awt.*;
 import client.resource.Fonts;
 import client.resource.Images;  // ★ 이미지 불러오기용
 
+/*
+    입력한 단어가 보이는 칠판 UI
+    1. 칠판 이미지를 붙이고 이미지가 보이도록 JLabel 투명 처리
+    2. 올바른 단어는 하얀색 글자로 표시
+    3. 불가능한 단어는 붉은 색 글자로 강조 표시
+    4. 패널 구석에 마지막 단어 표시
+*/
 public class WordBoard extends JPanel {
 
     private JLabel wordLabel;
@@ -13,10 +20,10 @@ public class WordBoard extends JPanel {
 
     public WordBoard() {
 
-        // ★ 갈색 테두리는 그대로 유지
+        // 갈색 테두리는 그대로 유지
         setBorder(BorderFactory.createLineBorder(new Color(120, 70, 20), 10));
 
-        // 투명하게 설정 → 이미지가 보이도록
+        // JLabel 투명하게 설정 → 이미지가 보이도록
         setOpaque(false);
 
         wordLabel = new JLabel("-", SwingConstants.CENTER);
@@ -36,7 +43,7 @@ public class WordBoard extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    /* 🔥 여기서 배경 이미지를 직접 그린다 */
+    // 배경 이미지 직접 그림
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

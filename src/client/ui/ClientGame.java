@@ -15,6 +15,12 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+    실제 끝말잇기 게임 진행 화면
+    1. 상단 타이머 바 / 중단 칠판 및 이전 단어 카드 / 하단 유저 카드로 구성
+    2. GameController를 통해 게임 진행 및 UI 갱신
+    3. 턴 관련 예외처리 (InputText 비활성화 / 타이머 바 sleep 등)
+*/
 public class ClientGame extends JFrame {
 
     private List<PlayerCard> playerCards = new ArrayList<>();
@@ -39,9 +45,6 @@ public class ClientGame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-
-
 
         // ====== 상단 ======
         timerBar = new TimerBar(gameController.getLevelTime(), () -> {
@@ -229,6 +232,7 @@ public class ClientGame extends JFrame {
         showCountdownOverlay();
     }
 
+    // 게임 시작 전 3초 카운트다운 오버레이 UI
     private void showCountdownOverlay() {
         JWindow overlay = new JWindow(this);
         overlay.setSize(getWidth(), getHeight());

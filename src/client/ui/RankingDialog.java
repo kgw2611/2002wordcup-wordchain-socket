@@ -8,6 +8,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+/*
+    게임 종료 후 순위를 보여주는 플로팅 다이얼로그
+    1. 순위에 따라 금-은-동 메달 이미지 삽입
+    2. 유저 닉네임 표시
+    3. 게임 종료 또는 대기방 이동 가능
+*/
 public class RankingDialog extends JDialog {
 
     public RankingDialog(JFrame parent, List<String> ranks) {
@@ -34,25 +40,23 @@ public class RankingDialog extends JDialog {
         listPanel.setOpaque(false);
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
 
-// 리스트 패널 래퍼
+        // 리스트 패널 래퍼
         JPanel listWrapper = new JPanel(new BorderLayout());  // ← 수정됨!
         listWrapper.setOpaque(false);
         listWrapper.setBorder(BorderFactory.createEmptyBorder(0, 30, 0, 30));
         listWrapper.add(listPanel, BorderLayout.CENTER);
 
-// ★★★ 스크롤 추가 ★★★
+        // 스크롤 추가
         JScrollPane scroll = new JScrollPane(listWrapper);
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
 
-// 🚫 가로 스크롤 완전 제거
+        // 스크롤
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-// 세로스크롤만
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-// 스크롤바 디자인
+        // 스크롤바 디자인
         scroll.getVerticalScrollBar().setUnitIncrement(16);
         scroll.getVerticalScrollBar().setPreferredSize(new Dimension(10, 0));
         scroll.getVerticalScrollBar().setUI(new javax.swing.plaf.basic.BasicScrollBarUI() {
@@ -63,20 +67,18 @@ public class RankingDialog extends JDialog {
             }
         });
 
-// 중앙에 삽입
+        // 중앙에 삽입
         container.add(scroll, BorderLayout.CENTER);
 
 
 
-        // 💡 사용자 수만큼만 추가!
+        // 사용자 수만큼만 추가
         for (int i = 0; i < ranks.size(); i++) {
             listPanel.add(makeRankRow(i + 1, ranks.get(i)));
             listPanel.add(Box.createVerticalStrut(22));
         }
 
-        // =======================
-        //      닫기 버튼
-        // =======================
+        // 닫기 버튼
         JButton btnLobby = new JButton("대기방으로 이동");
         btnLobby.setFont(Fonts.NORMAL.deriveFont(20f));
         btnLobby.setBackground(new Color(180, 150, 110));  // 기존 스타일 유지
@@ -108,12 +110,10 @@ public class RankingDialog extends JDialog {
         setVisible(true);
     }
 
-    // ==========================
-    //      한 줄 랭킹 패널
-    // ==========================
+    // 랭킹 패널
     private JPanel makeRankRow(int rank, String name) {
 
-        // 💡 배경색 통일 (중앙 UI와 어울리는 톤)
+        // 배경색 통일 (중앙 UI와 어울리는 톤)
         Color rowColor = new Color(255, 250, 240);
 
         RoundedPanel row = new RoundedPanel(rowColor);
@@ -150,9 +150,7 @@ public class RankingDialog extends JDialog {
         return row;
     }
 
-    // ==========================
-    //       둥근 패널
-    // ==========================
+    // 둥근 패널
     private static class RoundedPanel extends JPanel {
         private final Color bg;
 

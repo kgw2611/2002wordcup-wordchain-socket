@@ -5,10 +5,19 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/*
+    서버 프로그램
+    1. 소켓을 열어 클라이언트와 연결
+    2. 클라이언트 핸들러를 통한 클라이언트 관리 및 메시지 프로토콜 처리
+    3. 단어 사전 생성 및 파일 로드
+    4. 끝말잇기 게임 로직 검증
+    5. 대기방 - 게임 - 순위 까지 전체 게임 진행
+    6. 유저 준비 상태, 게임 진행 사항 초기화
+*/
 public class ServerMain {
 
-    private static final int PORT = 8080;
-    private static final List<ClientHandler> clients = new ArrayList<>();
+    private static final int PORT = 8080; // 포트 설정 -> 포트 별로 방 생성
+    private static final List<ClientHandler> clients = new ArrayList<>(); // 유저 관리용 컬렉션
     private static final Set<String> dictionary = new HashSet<>(370_000); // 단어 사전
     private static final Set<String> usedWords = new HashSet<>(); // 사용된 단어 사전
     private static String lastWord = null;
@@ -21,8 +30,9 @@ public class ServerMain {
     private static boolean gameStarted = false;
 
     public static void main(String[] args) throws IOException {
-        System.out.println("🔥 Server Started : " + PORT);
+        System.out.println("Server Started : " + PORT);
 
+        // 사전 파일 Set으로 로딩
         try (BufferedReader in = new BufferedReader(new InputStreamReader(
                 new FileInputStream("src/serversettings/MiniDictionary.txt"), StandardCharsets.UTF_8)))
         {
@@ -35,6 +45,7 @@ public class ServerMain {
             System.out.println("dictionary loaded : " + dictionary.size());
         } catch (IOException e) { e.printStackTrace(); }
 
+        // 실제 소켓 열기
         try (ServerSocket server = new ServerSocket(PORT)) {
             while (true) {
                 Socket socket = server.accept();
@@ -45,12 +56,12 @@ public class ServerMain {
         } catch (Exception e) { e.printStackTrace(); }
     }
 
-    // ==== 메시지 브로드캐스트 ====
+    // 메시지 브로드캐스트
     public static synchronized void broadcast(String msg) {
         for (ClientHandler c : clients) c.send(msg);
     }
 
-    // READY 전체 확인
+    // 준비 상태 확인
     public static boolean allReady() {
         if (clients.size() < 2) return false;
 
@@ -59,7 +70,7 @@ public class ServerMain {
         return true;
     }
 
-    // 생존자 목록
+    // 생존자 목록 get
     public static synchronized List<String> getAlivePlayers() {
         List<String> alive = new ArrayList<>();
         for (ClientHandler c : clients) {
@@ -102,7 +113,7 @@ public class ServerMain {
         broadcast("TURN:" + next);
     }
 
-    // ==== 클라이언트 핸들러 ====
+    // 클라이언트 핸들러
     static class ClientHandler extends Thread {
 
         Socket socket;
@@ -121,9 +132,11 @@ public class ServerMain {
                 writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
                 String msg;
+
+                // msg를 통한 프로토콜 검증 및 실행
                 while ((msg = reader.readLine()) != null) {
 
-                    // JOIN
+                    // JOIN - 대기방 입장 시 프로토콜
                     if (msg.startsWith("JOIN:")) {
                         isReady = false;
                         broadcastReadyList();
@@ -138,12 +151,12 @@ public class ServerMain {
                         continue;
                     }
 
-                    // CHAT
+                    // CHAT - 대기방 채팅 프로토콜
                     if (msg.startsWith("CHAT:")) {
                         broadcast(msg);
                         continue;
                     }
-                    // CHARACTER
+                    // CHARACTER - 캐릭터 변경 프로토콜
                     if (msg.startsWith("CHARACTER:")) {
                         // FORMAT: CHARACTER:홍길동:TYPE1
                         String[] sp = msg.split(":");
@@ -163,7 +176,7 @@ public class ServerMain {
 
 
 
-                    // READY
+                    // READY - 대기방 준비 프로토콜
                     if (msg.startsWith("READY:")) {
                         isReady = !isReady;
                         if(isReady) {
@@ -175,6 +188,7 @@ public class ServerMain {
 
                         broadcastReadyList();
 
+                        // 대기방 인원이 모두 준비했을 때
                         if (allReady()) {
                             broadcast("[SYSTEM] 모든 인원이 준비되었습니다. 3초 후 게임이 시작됩니다.");
 
@@ -201,8 +215,7 @@ public class ServerMain {
                     }
 
 
-                    // WORD
-
+                    // WORD - 게임 내 단어 입력 프로토콜
                     if (msg.startsWith("WORD:")) {
                         String word = msg.substring(5).trim();
 
@@ -223,19 +236,19 @@ public class ServerMain {
                             if (prev != curr) valid = false;
                         }
 
-                        // ===== 틀린 단어 처리 =====
+                        // 틀린 단어 처리
                         if (!valid) {
                             broadcast("WORD_INVALID:" + playerName + ":" + word);
                             continue;
                         }
 
-                        // ===== 올바른 단어 처리 =====
+                        // 올바른 단어 처리
                         synchronized (usedWords) { usedWords.add(word); }
                         lastWord = word;
 
                         broadcast("WORD:" + word);
 
-                        // ===== 레벨업 체크 =====
+                        // 레벨업 체크
                         wordCount++;
 
                         if (wordCount >= 12) {
@@ -258,11 +271,7 @@ public class ServerMain {
                         continue;
                     }
 
-
-
-                    // TIMEOUT → LIFE_LOST 처리
-
-                    // TIMEOUT → LIFE_LOST 처리
+                    // TIMEOUT - 게임 내 입력 시간 초과 프로토콜
                     if (msg.equals("TIMEOUT")) {
 
                         // 죽은 사람은 제외
@@ -273,7 +282,7 @@ public class ServerMain {
 
                         broadcast("LIFE_LOST:" + playerName);
 
-                        // ❗ 시간 초과 → 체인 끊기 (새 라운드 느낌)
+                        // 시간 초과 → 체인 끊기 (중복 단어가 아닌 아무 단어 입력 가능)
                         lastWord = null;
 
                         if (remain <= 0) {
@@ -288,7 +297,7 @@ public class ServerMain {
 
 
 
-                    // WINNER 직접 전달
+                    // WINNER - 게임 승리 판별 프로토콜
                     if (msg.startsWith("WINNER:")) {
                         String winner = msg.substring(7);
                         broadcast("GAME_OVER:" + winner);
@@ -325,6 +334,7 @@ public class ServerMain {
         broadcast(sb.toString());
     }
 
+    // 준비 완료 플레이어 목록 확인용 브로드캐스트 함수
     private static void broadcastReadyList() {
         StringBuilder sb = new StringBuilder("PLAYER_READY_LIST:");
         for (ClientHandler c : clients) {
@@ -344,6 +354,7 @@ public class ServerMain {
         return dictionary.contains(word);
     }
 
+    // 게임 종료 시 준비 상태 초기화 함수
     private static void resetReady() {
         for (ClientHandler c : clients) {
             c.isReady = false;
@@ -351,7 +362,7 @@ public class ServerMain {
         broadcastReadyList();
     }
 
-    // 게임 초기화
+    // 이전에 진행된 게임 정보 초기화 함수
     private static synchronized void resetGameState() {
         // 마지막 단어 / 레벨 / 단어 수
         lastWord = null;

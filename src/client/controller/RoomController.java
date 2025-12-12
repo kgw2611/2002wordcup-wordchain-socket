@@ -8,6 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/*
+    대기방 - 게임 진행 관리 컨트롤러 (실질적 게임 관리는 GameController)
+    1. 화면이 넘어가도 소켓 연결이 유지되도록 멤버 변수에 포트와 소켓을 가짐
+    2. 플레이어 갱신 / 준비 목록 갱신 / 채팅창 / 시스템 메시지 / 게임 시작 관리
+    3. 실제 게임 시작 후에도 단어 / 잘못된 단어 / 목숨 / 레벨 업 / 게임 종료 관리
+    4. 게임 시작 후 프로토콜은 트리거 역할, 실제 로직은 GameController로 위임
+*/
 public class RoomController {
 
     private final MainViewModel viewModel;
@@ -26,17 +33,17 @@ public class RoomController {
         this.socket = new ClientSocket();
         this.port = port;
 
-        // 🔥 ViewModel → RoomController → Server 로 캐릭터 선택 전달
+        // ViewModel → RoomController → Server 로 캐릭터 선택 전달
         viewModel.setOnCharacterChangedListener(type -> {
             String msg = "CHARACTER:" + viewModel.getPlayer().getName() + ":" + type;
             socket.sendMessage(msg);
         });
     }
 
+    // 컨트롤러, 유저 목록, 채팅, 게임 시작 getter/setter
     public GameController getGameController() {
         return gameController;
     }
-
     public void setOnPlayersChanged(Consumer<List<PlayerInfo>> cb) { this.onPlayersChanged = cb; }
     public void setOnChatReceived(Consumer<String> cb) { this.onChat = cb; }
     public void setOnPlayerReady(Consumer<String> cb) { this.onPlayerReady = cb; }
@@ -46,9 +53,10 @@ public class RoomController {
         return socket.connect("localhost", port, this::handleMessage);
     }
 
+    // 게임 대기방 내 메시지를 다루는 핸들러
     private void handleMessage(String msg) {
 
-        // 🧡 플레이어 목록
+        // 플레이어 목록 프로토콜
         if (msg.startsWith("PLAYER_LIST:")) {
             List<PlayerInfo> list = parsePlayers(msg.substring(12));
             viewModel.updatePlayers(list);
@@ -56,7 +64,7 @@ public class RoomController {
             return;
         }
 
-        // 🔥 캐릭터 업데이트
+        // 캐릭터 업데이트 프로토콜
         if (msg.startsWith("CHARACTER_UPDATE:")) {
             // FORMAT → CHARACTER_UPDATE:홍길동:TYPE2
             String[] sp = msg.split(":");
@@ -75,23 +83,25 @@ public class RoomController {
             return;
         }
 
-        // READY 리스트
+        // READY 리스트 프로토콜
         if (msg.startsWith("PLAYER_READY_LIST:")) {
             if (onPlayerReady != null) onPlayerReady.accept(msg.substring(18));
             return;
         }
 
-        // 채팅
+        // 채팅 프로토콜
         if (msg.startsWith("CHAT:")) {
             if (onChat != null) onChat.accept(msg.substring(5));
             return;
         }
 
+        // 시스템 메시지 프로토콜
         if(msg.startsWith("[SYSTEM]")) {
             if (onChat != null) onChat.accept(msg);
             return;
         }
 
+        // 게임 시작 프로토콜
         if (msg.equals("GAME_START")) {
             gameController = new GameController(socket);
             if (onGameStart != null) onGameStart.run();
@@ -101,7 +111,10 @@ public class RoomController {
         if (gameController != null) handleGameMessage(msg);
     }
 
+    // 게임 내 메시지를 다루는 게임 메시지 핸들러
     private void handleGameMessage(String msg) {
+        
+        // 턴 변경 프로토콜
         if (msg.startsWith("TURN:")) {
             String name = msg.substring(5);
             gameController.triggerTurn(name);
@@ -163,11 +176,11 @@ public class RoomController {
             }
 
             if (existing != null) {
-                // 🔥 기존 객체 그대로 사용 (캐릭터 타입 유지)
+                // 기존 객체 그대로 사용 (캐릭터 타입 유지)
                 list.add(existing);
 
             } else {
-                // 🔥 새 플레이어 → DEFAULT 캐릭터로 추가
+                // 새 플레이어 → DEFAULT 캐릭터로 추가
                 PlayerInfo newP = new PlayerInfo(name);
                 newP.setCharacterType("DEFAULT");
                 list.add(newP);

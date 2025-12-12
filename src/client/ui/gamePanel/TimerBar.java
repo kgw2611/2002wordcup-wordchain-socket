@@ -4,6 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 import client.resource.Fonts;
 
+/*
+    게임 화면 상단 단어 입력 타이머 바 UI
+    1. 시간이 줄어들 수록 바 길이 짧아지도록 그래픽 처리
+    2. 시간이 줄어들 수록 바 색 변화 (초록 -> 노랑 -> 빨강)
+*/
 public class TimerBar extends JPanel {
 
     private int time;

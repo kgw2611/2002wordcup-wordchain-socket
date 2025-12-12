@@ -4,6 +4,12 @@ import client.network.ClientSocket;
 
 import java.util.function.Consumer;
 
+/*
+    실질적 게임 관리/진행 컨트롤러
+    1. 화면이 넘어가도 소켓 연결이 유지되도록 멤버 변수에 포트와 소켓을 가짐
+    2. RoomController에서 트리거로 넘어온 부분들을 서버와 통신해 실제로 처리
+    3. 플레이어 턴 / 단어 전송 / 타이머 처리 / 레벨 로직 / 게임 종료 / 목숨 등 게임 진행 전부 관리
+*/
 public class GameController {
     private ClientSocket socket;
     private Runnable onGameStart;
@@ -81,7 +87,7 @@ public class GameController {
         onGameOver = cb;
     }
 
-    // 🔥 LIFE_LOST 콜백 등록
+    // LIFE_LOST 콜백 등록
     public void setOnLifeLost(Consumer<String> cb) {
         onLifeLost = cb;
     }
@@ -114,7 +120,7 @@ public class GameController {
         if (onGameOver != null) onGameOver.accept(winner);
     }
 
-    // 🔥 서버에서 "LIFE_LOST:이름" 왔을 때 호출
+    // 서버에서 "LIFE_LOST:이름" 왔을 때 호출
     public void triggerLifeLost(String name) {
         if (onLifeLost != null) onLifeLost.accept(name);
     }

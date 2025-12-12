@@ -11,6 +11,13 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+/*
+    게임 대기방 화면
+    1. 유저 패널과 채팅창, 준비 버튼으로 구성
+    2. 유저는 게임 준비 완료 / 취소, 채팅, 유저 패널의 캐릭터 이미지 변경 가능
+    3. 게임 종료 시 준비 상태 초기화
+    4. 플레이어 리스트 관리 / 준비 상태 수신 / 채팅 수신 / 게임 시작 트리거는 RoomController가 관리
+*/
 public class ClientRoom extends JFrame {
 
     private JTextArea chatArea;
@@ -48,6 +55,7 @@ public class ClientRoom extends JFrame {
         Styles.styleButton(readyBtn);
         add(readyBtn, BorderLayout.SOUTH);
 
+        // 준비 버튼 로직
         readyBtn.addActionListener(e -> {
             isReady = !isReady;
             controller.sendReady();
@@ -165,6 +173,8 @@ public class ClientRoom extends JFrame {
 
         controller.joinRoom();
     }
+
+    // 게임 시작 전달
     private void startGame() {
 
         String myName = viewModel.getPlayer().getName();   // ← 이거 추가
@@ -185,7 +195,7 @@ public class ClientRoom extends JFrame {
         game.setVisible(true);
     }
 
-
+    // 유저 슬롯 업데이트
     private void updateSlotsFromServer(List<PlayerInfo> players) {
 
         slotPanel.removeAll();
@@ -235,7 +245,7 @@ public class ClientRoom extends JFrame {
 
 
 
-    // 빈 슬롯
+    // 빈 슬롯 만들기
     private JPanel makeSlotCell() {
         JPanel cell = new JPanel(new BorderLayout());
         cell.setOpaque(false);
@@ -249,9 +259,7 @@ public class ClientRoom extends JFrame {
         return cell;
     }
 
-
-
-
+    // 플레이어 준비 상태 업데이트
     private void updateReadyStates(String data) {
 
         List<PlayerInfo> players = viewModel.getPlayers();
