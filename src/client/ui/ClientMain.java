@@ -65,44 +65,34 @@ public class ClientMain extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(20, 15, 20, 15);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        // -------------------------------
+        
         // 이름 라벨
-        // -------------------------------
         gbc.gridy = 0;
         JLabel nameLabel = new JLabel("이름");
-        nameLabel.setFont(Fonts.LABEL);           // 🔥 폰트 변경
+        nameLabel.setFont(Fonts.LABEL);           // 폰트 변경
         nameLabel.setForeground(Colors.TEXT_DARK);
         rightPanel.add(nameLabel, gbc);
-
-        // -------------------------------
+        
         // 이름 입력창
-        // -------------------------------
         gbc.gridy = 1;
         nameField = new JTextField();
         Styles.styleTextField(nameField);         // 내부에서 Fonts.NORMAL 쓰면 자동 적용됨
         rightPanel.add(nameField, gbc);
-
-        // -------------------------------
+        
         // 포트 라벨
-        // -------------------------------
         gbc.gridy = 2;
         JLabel portLabel = new JLabel("포트");
-        portLabel.setFont(Fonts.LABEL);           // 🔥 폰트 변경
+        portLabel.setFont(Fonts.LABEL);           // 폰트 변경
         portLabel.setForeground(Colors.TEXT_DARK);
         rightPanel.add(portLabel, gbc);
 
-        // -------------------------------
         // 포트 입력창
-        // -------------------------------
         gbc.gridy = 3;
         portField = new JTextField();
         Styles.styleTextField(portField);         // 내부에서 Fonts.NORMAL 적용
         rightPanel.add(portField, gbc);
 
-        // -------------------------------
         // 대기방 입장 버튼
-        // -------------------------------
         gbc.gridy = 4;
         enterBtn = new JButton("대기방 입장");
         Styles.styleButton(enterBtn);             // 내부에서 Fonts.BUTTON 적용
